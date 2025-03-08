@@ -1,0 +1,189 @@
+{
+  "properties": [
+    {
+      "name": "dsn.hostname",
+      "type": "java.lang.String",
+      "sourceType": "io.github.summer.boot.autoconfigure.DsnProperties"
+    },
+    {
+      "name": "dsn.port",
+      "type": "java.lang.Integer",
+      "sourceType": "io.github.summer.boot.autoconfigure.DsnProperties"
+    },
+    {
+      "name": "dsn.username",
+      "type": "java.lang.String",
+      "sourceType": "io.github.summer.boot.autoconfigure.DsnProperties"
+    },
+    {
+      "name": "dsn.password",
+      "type": "java.lang.String",
+      "sourceType": "io.github.summer.boot.autoconfigure.DsnProperties"
+    },
+    {
+      "name": "dsn.database",
+      "type": "java.lang.String",
+      "sourceType": "io.github.summer.boot.autoconfigure.DsnProperties"
+    },
+    {
+      "name": "dsn.monitored-tables",
+      "type": "java.lang.String",
+      "sourceType": "io.github.summer.boot.autoconfigure.DsnProperties"
+    },
+    {
+      "name": "dsn.server-time-zone",
+      "type": "java.lang.String",
+      "sourceType": "io.github.summer.boot.autoconfigure.DsnProperties"
+    },
+    {
+      "name": "cors.enable",
+      "type": "java.lang.Boolean",
+      "sourceType": "io.github.summer.boot.autoconfigure.CorsProperties"
+    },
+    {
+      "name": "cors.path-pattern",
+      "type": "java.lang.String",
+      "sourceType": "io.github.summer.boot.autoconfigure.CorsProperties"
+    },
+    {
+      "name": "cors.allow-headers",
+      "type": "java.lang.String",
+      "sourceType": "io.github.summer.boot.autoconfigure.CorsProperties"
+    },
+    {
+      "name": "cors.allow-methods",
+      "type": "java.lang.String",
+      "sourceType": "io.github.summer.boot.autoconfigure.CorsProperties"
+    },
+    {
+      "name": "cors.allow-origin-patterns",
+      "type": "java.lang.String",
+      "sourceType": "io.github.summer.boot.autoconfigure.CorsProperties"
+    },
+    {
+      "name": "cors.allow-credentials",
+      "type": "java.lang.Boolean",
+      "sourceType": "io.github.summer.boot.autoconfigure.CorsProperties"
+    },
+    {
+      "name": "cors.max-age",
+      "type": "java.lang.Long",
+      "sourceType": "io.github.summer.boot.autoconfigure.CorsProperties"
+    },
+    {
+      "name": "document.title",
+      "type": "java.lang.String",
+      "sourceType": "io.github.summer.boot.autoconfigure.DocumentProperties"
+    },
+    {
+      "name": "document.description",
+      "type": "java.lang.String",
+      "sourceType": "io.github.summer.boot.autoconfigure.DocumentProperties"
+    },
+    {
+      "name": "document.version",
+      "type": "java.lang.String",
+      "sourceType": "io.github.summer.boot.autoconfigure.DocumentProperties"
+    },
+    {
+      "name": "document.contact.name",
+      "type": "java.lang.String",
+      "sourceType": "io.github.summer.boot.autoconfigure.DocumentProperties.Contact"
+    },
+    {
+      "name": "document.contact.url",
+      "type": "java.lang.String",
+      "sourceType": "io.github.summer.boot.autoconfigure.DocumentProperties.Contact"
+    },
+    {
+      "name": "document.contact.email",
+      "type": "java.lang.String",
+      "sourceType": "io.github.summer.boot.autoconfigure.DocumentProperties.Contact"
+    },
+    {
+      "name": "document.license.name",
+      "type": "java.lang.String",
+      "sourceType": "io.github.summer.boot.autoconfigure.DocumentProperties.License"
+    },
+    {
+      "name": "document.license.url",
+      "type": "java.lang.String",
+      "sourceType": "io.github.summer.boot.autoconfigure.DocumentProperties.License"
+    },
+    {
+      "name": "sharding.db-size",
+      "type": "java.lang.Integer",
+      "sourceType": "io.github.summer.boot.autoconfigure.ShardingProperties"
+    },
+    {
+      "name": "sharding.table-size",
+      "type": "java.lang.Integer",
+      "sourceType": "io.github.summer.boot.autoconfigure.ShardingProperties"
+    },
+    {
+      "name": "sharding-num.table-size",
+      "type": "java.lang.Integer",
+      "sourceType": "io.github.summer.boot.autoconfigure.ShardingNumProperties"
+    },
+    {
+      "name": "worker-id.min-id",
+      "type": "java.lang.Integer",
+      "sourceType": "io.github.summer.boot.autoconfigure.WorkerIdProperties"
+    },
+    {
+      "name": "worker-id.max-id",
+      "type": "java.lang.Integer",
+      "sourceType": "io.github.summer.boot.autoconfigure.WorkerIdProperties"
+    },
+    {
+      "name": "worker-id.group-id",
+      "type": "java.lang.String",
+      "sourceType": "io.github.summer.boot.autoconfigure.WorkerIdProperties"
+    },
+    {
+      "name": "zookeeper.connect-string",
+      "type": "java.lang.String",
+      "sourceType": "io.github.summer.boot.autoconfigure.ZookeeperProperties"
+    },
+    {
+      "name": "zookeeper.base-path",
+      "type": "java.lang.String",
+      "sourceType": "io.github.summer.boot.autoconfigure.ZookeeperProperties"
+    },
+    {
+      "name": "zookeeper.max-retries",
+      "type": "java.lang.Integer",
+      "sourceType": "io.github.summer.boot.autoconfigure.ZookeeperProperties"
+    },
+    {
+      "name": "zookeeper.base-sleep-ms",
+      "type": "java.lang.Integer",
+      "sourceType": "io.github.summer.boot.autoconfigure.ZookeeperProperties"
+    },
+    {
+      "name": "zookeeper.max-sleep-ms",
+      "type": "java.lang.Integer",
+      "sourceType": "io.github.summer.boot.autoconfigure.ZookeeperProperties"
+    },
+    {
+      "name": "caffeine.spec",
+      "type": "java.util.Map",
+      "sourceType": "io.github.summer.boot.autoconfigure.CaffeineProperties"
+    },
+    {
+      "name": "warm-up.url",
+      "type": "java.lang.String",
+      "sourceType": "io.github.summer.boot.autoconfigure.WarmUpProperties"
+    },
+    {
+      "name": "warm-up.timeout",
+      "type": "java.lang.Integer",
+      "sourceType": "io.github.summer.boot.autoconfigure.WarmUpProperties"
+    },
+    {
+      "name": "warm-up.blocking",
+      "type": "java.lang.Boolean",
+      "sourceType": "io.github.summer.boot.autoconfigure.WarmUpProperties"
+    }
+  ]
+}
