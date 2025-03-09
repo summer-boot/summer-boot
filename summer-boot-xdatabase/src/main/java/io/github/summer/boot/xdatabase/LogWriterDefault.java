@@ -34,15 +34,33 @@ public final class LogWriterDefault {
         }
 
         @Override
+        public void selectList(String tableName, List<BaseFilter> filters, List<Order> orders, Page page, Throwable ex) {
+            LOGGER.error("selectList failed, tableName: {}, filters: {}, orders: {}, page: {}, throwable: ",
+                    tableName, escapeJava(filters), escapeJava(orders), escapeJava(page), ex);
+        }
+
+        @Override
         public void selectCount(String tableName, List<BaseFilter> filters, long result) {
             LOGGER.info("selectCount trace, tableName: {}, filters: {}, result: {}",
                     tableName, escapeJava(filters), result);
         }
 
         @Override
-        public void selectOne(String tableName, Value idValue, Map<String, Value> result) {
-            LOGGER.info("selectOne trace, tableName: {}, idValue: {}, result: {}",
-                    tableName, escapeJava(idValue), escapeJava(result));
+        public void selectCount(String tableName, List<BaseFilter> filters, Throwable ex) {
+            LOGGER.error("selectCount failed, tableName: {}, filters: {}, throwable: ",
+                    tableName, escapeJava(filters), ex);
+        }
+
+        @Override
+        public void selectOne(String tableName, Value keyValue, String keyName, Map<String, Value> result) {
+            LOGGER.info("selectOne trace, tableName: {}, keyValue: {}, keyName: {}, result: {}",
+                    tableName, escapeJava(keyValue), keyName, escapeJava(result));
+        }
+
+        @Override
+        public void selectOne(String tableName, Value keyValue, String keyName, Throwable ex) {
+            LOGGER.error("selectOne failed, tableName: {}, keyValue: {}, keyName: {}, throwable: ",
+                    tableName, escapeJava(keyValue), keyName, ex);
         }
 
         @Override
@@ -52,9 +70,21 @@ public final class LogWriterDefault {
         }
 
         @Override
+        public void selectOne(String tableName, List<BaseFilter> filters, List<Order> orders, Throwable ex) {
+            LOGGER.error("selectOne failed, tableName: {}, filters: {}, orders: {}, throwable: ",
+                    tableName, escapeJava(filters), escapeJava(orders), ex);
+        }
+
+        @Override
         public void checkExist(String tableName, List<BaseFilter> filters, boolean result) {
             LOGGER.info("checkExist trace, tableName: {}, filters: {}, result: {}",
                     tableName, escapeJava(filters), result);
+        }
+
+        @Override
+        public void checkExist(String tableName, List<BaseFilter> filters, Throwable ex) {
+            LOGGER.error("checkExist failed, tableName: {}, filters: {}, throwable: ",
+                    tableName, escapeJava(filters), ex);
         }
 
         @Override
@@ -64,15 +94,33 @@ public final class LogWriterDefault {
         }
 
         @Override
+        public void insert(String tableName, Map<String, Value> values, Throwable ex) {
+            LOGGER.error("insert failed, tableName: {}, values: {}, throwable: ",
+                    tableName, escapeJava(values), ex);
+        }
+
+        @Override
         public void batchInsert(String tableName, List<Map<String, Value>> list, int result) {
             LOGGER.info("batchInsert trace, tableName: {}, list: {}, result: {}",
                     tableName, escapeJava(list), result);
         }
 
         @Override
-        public void update(String tableName, Value idValue, List<String> sets, Map<String, Value> setValues, int result) {
-            LOGGER.info("update trace, tableName: {}, idValue: {}, sets: {}, setValues: {}, result: {}",
-                    tableName, escapeJava(idValue), escapeJava(sets), escapeJava(setValues), result);
+        public void batchInsert(String tableName, List<Map<String, Value>> list, Throwable ex) {
+            LOGGER.error("batchInsert failed, tableName: {}, list: {}, throwable: ",
+                    tableName, escapeJava(list), ex);
+        }
+
+        @Override
+        public void update(String tableName, Value keyValue, List<String> sets, Map<String, Value> setValues, String keyName, int result) {
+            LOGGER.info("update trace, tableName: {}, keyValue: {}, sets: {}, setValues: {}, keyName: {}, result: {}",
+                    tableName, escapeJava(keyValue), escapeJava(sets), escapeJava(setValues), keyName, result);
+        }
+
+        @Override
+        public void update(String tableName, Value keyValue, List<String> sets, Map<String, Value> setValues, String keyName, Throwable ex) {
+            LOGGER.error("update failed, tableName: {}, keyValue: {}, sets: {}, setValues: {}, keyName: {}, throwable: ",
+                    tableName, escapeJava(keyValue), escapeJava(sets), escapeJava(setValues), keyName, ex);
         }
 
         @Override
@@ -82,21 +130,45 @@ public final class LogWriterDefault {
         }
 
         @Override
-        public void batchUpdate(String tableName, List<String> sets, List<String> setNames, List<Map<String, Value>> list, int[] result) {
-            LOGGER.info("batchUpdate trace, tableName: {}, sets: {}, setNames: {}, list: {}, result: {}",
-                    tableName, escapeJava(sets), escapeJava(setNames), escapeJava(list), escapeJava(result));
+        public void update(String tableName, List<String> sets, Map<String, Value> setValues, List<BaseFilter> filters, Throwable ex) {
+            LOGGER.error("update failed, tableName: {}, sets: {}, setValues: {}, filters: {}, throwable: ",
+                    tableName, escapeJava(sets), escapeJava(setValues), escapeJava(filters), ex);
         }
 
         @Override
-        public void delete(String tableName, Value idValue, int result) {
-            LOGGER.info("delete trace, tableName: {}, idValue: {}, result: {}",
-                    tableName, escapeJava(idValue), result);
+        public void batchUpdate(String tableName, List<String> sets, List<String> setNames, List<Map<String, Value>> list, String keyName, int[] result) {
+            LOGGER.info("batchUpdate trace, tableName: {}, sets: {}, setNames: {}, list: {}, keyName: {}, result: {}",
+                    tableName, escapeJava(sets), escapeJava(setNames), escapeJava(list), keyName, escapeJava(result));
+        }
+
+        @Override
+        public void batchUpdate(String tableName, List<String> sets, List<String> setNames, List<Map<String, Value>> list, String keyName, Throwable ex) {
+            LOGGER.error("batchUpdate failed, tableName: {}, sets: {}, setNames: {}, list: {}, keyName: {}, throwable: ",
+                    tableName, escapeJava(sets), escapeJava(setNames), escapeJava(list), keyName, ex);
+        }
+
+        @Override
+        public void delete(String tableName, Value keyValue, String keyName, int result) {
+            LOGGER.info("delete trace, tableName: {}, keyValue: {}, keyName: {}, result: {}",
+                    tableName, escapeJava(keyValue), keyName, result);
+        }
+
+        @Override
+        public void delete(String tableName, Value keyValue, String keyName, Throwable ex) {
+            LOGGER.error("delete failed, tableName: {}, keyValue: {}, keyName: {}, throwable: ",
+                    tableName, escapeJava(keyValue), keyName, ex);
         }
 
         @Override
         public void delete(String tableName, List<BaseFilter> filters, int result) {
             LOGGER.info("delete trace, tableName: {}, filters: {}, result: {}",
                     tableName, escapeJava(filters), result);
+        }
+
+        @Override
+        public void delete(String tableName, List<BaseFilter> filters, Throwable ex) {
+            LOGGER.error("delete failed, tableName: {}, filters: {}, throwable: ",
+                    tableName, escapeJava(filters), ex);
         }
 
         /**
@@ -161,9 +233,9 @@ public final class LogWriterDefault {
         }
 
         @Override
-        public void batchUpdate(Schema schema, List<String> sets, List<String> setNames, List<Map<String, Value>> list, int[] result) {
-            LOGGER.info("batchUpdate trace, schema: {}, sets: {}, setNames: {}, list: {}, result: {}",
-                    escapeJava(schema), escapeJava(sets), escapeJava(setNames), escapeJava(list), escapeJava(result));
+        public void batchUpdate(Schema schema, List<String> sets, List<String> setNames, List<Map<String, Value>> list, String keyName, int[] result) {
+            LOGGER.info("batchUpdate trace, schema: {}, sets: {}, setNames: {}, list: {}, keyName: {}, result: {}",
+                    escapeJava(schema), escapeJava(sets), escapeJava(setNames), escapeJava(list), keyName, escapeJava(result));
         }
 
         @Override

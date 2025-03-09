@@ -72,6 +72,17 @@ public final class LogWriter {
         void selectList(String tableName, List<BaseFilter> filters, List<Order> orders, Page page, List<Map<String, Value>> result);
 
         /**
+         * SELECT LIST
+         *
+         * @param tableName FROM table
+         * @param filters   [ the {@link BaseFilter} instance ]
+         * @param orders    [ the {@link Order} instance ]
+         * @param page      the {@link Page} instance
+         * @param ex        the {@link Throwable} instance
+         */
+        void selectList(String tableName, List<BaseFilter> filters, List<Order> orders, Page page, Throwable ex);
+
+        /**
          * SELECT COUNT
          *
          * @param tableName FROM table
@@ -81,13 +92,33 @@ public final class LogWriter {
         void selectCount(String tableName, List<BaseFilter> filters, long result);
 
         /**
+         * SELECT COUNT
+         *
+         * @param tableName FROM table
+         * @param filters   [ the {@link BaseFilter} instance ]
+         * @param ex        the {@link Throwable} instance
+         */
+        void selectCount(String tableName, List<BaseFilter> filters, Throwable ex);
+
+        /**
          * SELECT ONE
          *
          * @param tableName FROM table
-         * @param idValue   Primary Key Value
+         * @param keyValue  Key Value
+         * @param keyName   Key Name
          * @param result    [ Column Name : Column Value ]
          */
-        void selectOne(String tableName, Value idValue, Map<String, Value> result);
+        void selectOne(String tableName, Value keyValue, String keyName, Map<String, Value> result);
+
+        /**
+         * SELECT ONE
+         *
+         * @param tableName FROM table
+         * @param keyValue  Key Value
+         * @param keyName   Key Name
+         * @param ex        the {@link Throwable} instance
+         */
+        void selectOne(String tableName, Value keyValue, String keyName, Throwable ex);
 
         /**
          * SELECT ONE
@@ -100,6 +131,16 @@ public final class LogWriter {
         void selectOne(String tableName, List<BaseFilter> filters, List<Order> orders, Map<String, Value> result);
 
         /**
+         * SELECT ONE
+         *
+         * @param tableName FROM table
+         * @param filters   [ the {@link BaseFilter} instance ]
+         * @param orders    [ the {@link Order} instance ]
+         * @param ex        the {@link Throwable} instance
+         */
+        void selectOne(String tableName, List<BaseFilter> filters, List<Order> orders, Throwable ex);
+
+        /**
          * CHECK EXIST
          *
          * @param tableName FROM table
@@ -107,6 +148,15 @@ public final class LogWriter {
          * @param result    EXIST ? true : false
          */
         void checkExist(String tableName, List<BaseFilter> filters, boolean result);
+
+        /**
+         * CHECK EXIST
+         *
+         * @param tableName FROM table
+         * @param filters   [ the {@link BaseFilter} instance ]
+         * @param ex        the {@link Throwable} instance
+         */
+        void checkExist(String tableName, List<BaseFilter> filters, Throwable ex);
 
         /**
          * INSERT
@@ -118,6 +168,15 @@ public final class LogWriter {
         void insert(String tableName, Map<String, Value> values, int result);
 
         /**
+         * INSERT
+         *
+         * @param tableName INSERT INTO table
+         * @param values    [ Column Name : Column Value ]
+         * @param ex        the {@link Throwable} instance
+         */
+        void insert(String tableName, Map<String, Value> values, Throwable ex);
+
+        /**
          * BATCH INSERT
          *
          * @param tableName INSERT INTO table
@@ -127,15 +186,37 @@ public final class LogWriter {
         void batchInsert(String tableName, List<Map<String, Value>> list, int result);
 
         /**
+         * BATCH INSERT
+         *
+         * @param tableName INSERT INTO table
+         * @param list      [ [ Column Name : Column Value ] ]
+         * @param ex        the {@link Throwable} instance
+         */
+        void batchInsert(String tableName, List<Map<String, Value>> list, Throwable ex);
+
+        /**
          * UPDATE
          *
          * @param tableName UPDATE table
-         * @param idValue   Primary Key Value
+         * @param keyValue  Key Value
          * @param sets      [ column = column + 1 ]
          * @param setValues [ Set Name : Set Value ]
+         * @param keyName   Key Name
          * @param result    AFFECTED ROWS
          */
-        void update(String tableName, Value idValue, List<String> sets, Map<String, Value> setValues, int result);
+        void update(String tableName, Value keyValue, List<String> sets, Map<String, Value> setValues, String keyName, int result);
+
+        /**
+         * UPDATE
+         *
+         * @param tableName UPDATE table
+         * @param keyValue  Key Value
+         * @param sets      [ column = column + 1 ]
+         * @param setValues [ Set Name : Set Value ]
+         * @param keyName   Key Name
+         * @param ex        the {@link Throwable} instance
+         */
+        void update(String tableName, Value keyValue, List<String> sets, Map<String, Value> setValues, String keyName, Throwable ex);
 
         /**
          * UPDATE
@@ -149,24 +230,59 @@ public final class LogWriter {
         void update(String tableName, List<String> sets, Map<String, Value> setValues, List<BaseFilter> filters, int result);
 
         /**
+         * UPDATE
+         *
+         * @param tableName UPDATE table
+         * @param sets      [ column = column + 1 ]
+         * @param setValues [ Set Name : Set Value ]
+         * @param filters   [ the {@link BaseFilter} instance ]
+         * @param ex        the {@link Throwable} instance
+         */
+        void update(String tableName, List<String> sets, Map<String, Value> setValues, List<BaseFilter> filters, Throwable ex);
+
+        /**
          * BATCH UPDATE
          *
          * @param tableName UPDATE table
          * @param sets      [ column = column + 1 ]
          * @param setNames  [ Set Name ]
          * @param list      [ [ Parameter Name : Parameter Value ] ]
+         * @param keyName   Key Name
          * @param result    AFFECTED ROWS
          */
-        void batchUpdate(String tableName, List<String> sets, List<String> setNames, List<Map<String, Value>> list, int[] result);
+        void batchUpdate(String tableName, List<String> sets, List<String> setNames, List<Map<String, Value>> list, String keyName, int[] result);
+
+        /**
+         * BATCH UPDATE
+         *
+         * @param tableName UPDATE table
+         * @param sets      [ column = column + 1 ]
+         * @param setNames  [ Set Name ]
+         * @param list      [ [ Parameter Name : Parameter Value ] ]
+         * @param keyName   Key Name
+         * @param ex        the {@link Throwable} instance
+         */
+        void batchUpdate(String tableName, List<String> sets, List<String> setNames, List<Map<String, Value>> list, String keyName, Throwable ex);
 
         /**
          * DELETE
          *
          * @param tableName DELETE FROM table
-         * @param idValue   Primary Key Value
+         * @param keyValue  Key Value
+         * @param keyName   Key Name
          * @param result    AFFECTED ROWS
          */
-        void delete(String tableName, Value idValue, int result);
+        void delete(String tableName, Value keyValue, String keyName, int result);
+
+        /**
+         * DELETE
+         *
+         * @param tableName DELETE FROM table
+         * @param keyValue  Key Value
+         * @param keyName   Key Name
+         * @param ex        the {@link Throwable} instance
+         */
+        void delete(String tableName, Value keyValue, String keyName, Throwable ex);
 
         /**
          * DELETE
@@ -176,6 +292,15 @@ public final class LogWriter {
          * @param result    AFFECTED ROWS
          */
         void delete(String tableName, List<BaseFilter> filters, int result);
+
+        /**
+         * DELETE
+         *
+         * @param tableName DELETE FROM table
+         * @param filters   [ the {@link BaseFilter} instance ]
+         * @param ex        the {@link Throwable} instance
+         */
+        void delete(String tableName, List<BaseFilter> filters, Throwable ex);
 
     }
 
@@ -259,9 +384,10 @@ public final class LogWriter {
          * @param sets     [ column = column + 1 ]
          * @param setNames [ Set Name ]
          * @param list     [ [ Parameter Name : Parameter Value ] ]
+         * @param keyName  Key Name
          * @param result   AFFECTED ROWS
          */
-        void batchUpdate(Schema schema, List<String> sets, List<String> setNames, List<Map<String, Value>> list, int[] result);
+        void batchUpdate(Schema schema, List<String> sets, List<String> setNames, List<Map<String, Value>> list, String keyName, int[] result);
 
         /**
          * DELETE

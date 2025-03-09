@@ -1,7 +1,6 @@
 package io.github.summer.boot.xdatabase;
 
 import io.github.summer.boot.filter.BaseFilter;
-import io.github.summer.boot.filter.ExpressionFilter;
 import io.github.summer.boot.filter.Order;
 import io.github.summer.boot.filter.Page;
 import io.github.summer.boot.value.Value;
@@ -9,7 +8,10 @@ import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Database
@@ -39,11 +41,16 @@ public class Database {
      */
     public List<Map<String, Value>> selectList(@NotNull String tableName,
                                                List<BaseFilter> filters, List<Order> orders, Page page) {
-        Schema tableSchema = getTableSchema(tableName);
-        List<Map<String, Value>> result = template.selectList(tableSchema, filters, orders, page);
+        try {
+            Schema tableSchema = getTableSchema(tableName);
+            List<Map<String, Value>> result = template.selectList(tableSchema, filters, orders, page);
 
-        writeLogSelectList(tableName, filters, orders, page, result);
-        return result;
+            writeLogSelectList(tableName, filters, orders, page, result);
+            return result;
+        } catch (Throwable ex) {
+            writeLogSelectList(tableName, filters, orders, page, ex);
+            throw new Database.SelectException(tableName, ex);
+        }
     }
 
     /**
@@ -54,27 +61,39 @@ public class Database {
      * @return AGGREGATE
      */
     public long selectCount(@NotNull String tableName, List<BaseFilter> filters) {
-        Long aggregate = template.selectCount(tableName, filters);
-        long result = aggregate != null ? aggregate : 0;
+        try {
+            Long aggregate = template.selectCount(tableName, filters);
+            long result = aggregate != null ? aggregate : 0;
 
-        writeLogSelectCount(tableName, filters, result);
-        return result;
+            writeLogSelectCount(tableName, filters, result);
+            return result;
+        } catch (Throwable ex) {
+            writeLogSelectCount(tableName, filters, ex);
+            throw new Database.SelectException(tableName, ex);
+        }
     }
 
     /**
      * SELECT ONE
      *
      * @param tableName FROM table
-     * @param idValue   Primary Key Value
+     * @param keyValue  Key Value
+     * @param keyName   Key Name
      * @return [ Column Name : Column Value ]
      */
-    public Map<String, Value> selectOne(@NotNull String tableName, @NotNull Value idValue) {
-        Schema tableSchema = getTableSchema(tableName);
-        List<BaseFilter> filters = parseId(tableSchema, idValue);
-        Map<String, Value> result = template.selectOne(tableSchema, filters, null);
+    public Map<String, Value> selectOne(@NotNull String tableName,
+                                        @NotNull Value keyValue, @Nullable String keyName) {
+        try {
+            Schema tableSchema = getTableSchema(tableName);
+            List<BaseFilter> filters = parseKey(tableSchema, keyValue, keyName);
+            Map<String, Value> result = template.selectOne(tableSchema, filters, null);
 
-        writeLogSelectOne(tableName, idValue, result);
-        return result;
+            writeLogSelectOne(tableName, keyValue, keyName, result);
+            return result;
+        } catch (Throwable ex) {
+            writeLogSelectOne(tableName, keyValue, keyName, ex);
+            throw new Database.SelectException(tableName, ex);
+        }
     }
 
     /**
@@ -87,11 +106,16 @@ public class Database {
      */
     public Map<String, Value> selectOne(@NotNull String tableName,
                                         List<BaseFilter> filters, List<Order> orders) {
-        Schema tableSchema = getTableSchema(tableName);
-        Map<String, Value> result = template.selectOne(tableSchema, filters, orders);
+        try {
+            Schema tableSchema = getTableSchema(tableName);
+            Map<String, Value> result = template.selectOne(tableSchema, filters, orders);
 
-        writeLogSelectOne(tableName, filters, orders, result);
-        return result;
+            writeLogSelectOne(tableName, filters, orders, result);
+            return result;
+        } catch (Throwable ex) {
+            writeLogSelectOne(tableName, filters, orders, ex);
+            throw new Database.SelectException(tableName, ex);
+        }
     }
 
     /**
@@ -102,11 +126,16 @@ public class Database {
      * @return EXIST ? true : false
      */
     public boolean checkExist(@NotNull String tableName, List<BaseFilter> filters) {
-        Integer exist = template.checkExist(tableName, filters);
-        boolean result = exist != null && exist == 1;
+        try {
+            Integer exist = template.checkExist(tableName, filters);
+            boolean result = exist != null && exist == 1;
 
-        writeLogCheckExist(tableName, filters, result);
-        return result;
+            writeLogCheckExist(tableName, filters, result);
+            return result;
+        } catch (Throwable ex) {
+            writeLogCheckExist(tableName, filters, ex);
+            throw new Database.SelectException(tableName, ex);
+        }
     }
 
     /**
@@ -117,11 +146,16 @@ public class Database {
      * @return AFFECTED ROWS
      */
     public int insert(@NotNull String tableName, @NotNull Map<String, Value> values) {
-        Schema tableSchema = getTableSchema(tableName);
-        int result = template.insert(tableSchema, values);
+        try {
+            Schema tableSchema = getTableSchema(tableName);
+            int result = template.insert(tableSchema, values);
 
-        writeLogInsert(tableName, values, result);
-        return result;
+            writeLogInsert(tableName, values, result);
+            return result;
+        } catch (Throwable ex) {
+            writeLogInsert(tableName, values, ex);
+            throw new Database.InsertException(tableName, ex);
+        }
     }
 
     /**
@@ -132,31 +166,42 @@ public class Database {
      * @return AFFECTED ROWS
      */
     public int batchInsert(@NotNull String tableName, @NotNull List<Map<String, Value>> list) {
-        Schema tableSchema = getTableSchema(tableName);
-        int result = template.batchInsert(tableSchema, list);
+        try {
+            Schema tableSchema = getTableSchema(tableName);
+            int result = template.batchInsert(tableSchema, list);
 
-        writeLogBatchInsert(tableName, list, result);
-        return result;
+            writeLogBatchInsert(tableName, list, result);
+            return result;
+        } catch (Throwable ex) {
+            writeLogBatchInsert(tableName, list, ex);
+            throw new Database.InsertException(tableName, ex);
+        }
     }
 
     /**
      * UPDATE
      *
      * @param tableName UPDATE table
-     * @param idValue   Primary Key Value
+     * @param keyValue  Key Value
      * @param sets      [ column = column + 1 ]
      * @param setValues [ Set Name : Set Value ]
+     * @param keyName   Key Name
      * @return AFFECTED ROWS
      */
     public int update(@NotNull String tableName,
-                      @NotNull Value idValue,
-                      List<String> sets, Map<String, Value> setValues) {
-        Schema tableSchema = getTableSchema(tableName);
-        List<BaseFilter> filters = parseId(tableSchema, idValue);
-        int result = update(tableName, sets, setValues, filters);
+                      @NotNull Value keyValue,
+                      List<String> sets, Map<String, Value> setValues,
+                      @Nullable String keyName) {
+        try {
+            List<BaseFilter> filters = parseKey(tableName, keyValue, keyName);
+            int result = update(tableName, sets, setValues, filters);
 
-        writeLogUpdate(tableName, idValue, sets, setValues, result);
-        return result;
+            writeLogUpdate(tableName, keyValue, sets, setValues, keyName, result);
+            return result;
+        } catch (Throwable ex) {
+            writeLogUpdate(tableName, keyValue, sets, setValues, keyName, ex);
+            throw new Database.UpdateException(tableName, ex);
+        }
     }
 
     /**
@@ -171,36 +216,17 @@ public class Database {
     public int update(@NotNull String tableName,
                       List<String> sets, Map<String, Value> setValues,
                       List<BaseFilter> filters) {
-        Schema tableSchema = getTableSchema(tableName);
-        Set<String> columnNames = tableSchema.getColumnNamesOnUpdate();
+        try {
+            Schema tableSchema = getTableSchema(tableName);
+            List<String> setNames = parseSetNames(tableSchema, setValues);
+            int result = template.update(tableName, sets, setNames, setValues, filters);
 
-        List<String> setNames = new ArrayList<>();
-        if (setValues != null) {
-            for (Map.Entry<String, Value> entry : setValues.entrySet()) {
-                if (entry == null) {
-                    continue;
-                }
-
-                String columnName = entry.getKey();
-                if (columnName == null) {
-                    continue;
-                }
-
-                Value value = entry.getValue();
-                if (value == null) {
-                    continue;
-                }
-
-                if (columnNames.contains(columnName)) {
-                    setNames.add(columnName);
-                }
-            }
+            writeLogUpdate(tableName, sets, setValues, filters, result);
+            return result;
+        } catch (Throwable ex) {
+            writeLogUpdate(tableName, sets, setValues, filters, ex);
+            throw new Database.UpdateException(tableName, ex);
         }
-
-        int result = template.update(tableName, sets, setNames, setValues, filters);
-
-        writeLogUpdate(tableName, sets, setValues, filters, result);
-        return result;
     }
 
     /**
@@ -210,32 +236,44 @@ public class Database {
      * @param sets      [ column = column + 1 ]
      * @param setNames  [ Set Name ]
      * @param list      [ [ Parameter Name : Parameter Value ] ]
+     * @param keyName   Key Name
      * @return AFFECTED ROWS
      */
     public int[] batchUpdate(@NotNull String tableName,
                              List<String> sets, List<String> setNames,
-                             List<Map<String, Value>> list) {
-        Schema tableSchema = getTableSchema(tableName);
-        int[] result = template.batchUpdate(tableSchema, sets, setNames, list);
+                             List<Map<String, Value>> list,
+                             @Nullable String keyName) {
+        try {
+            Schema tableSchema = getTableSchema(tableName);
+            int[] result = template.batchUpdate(tableSchema, sets, setNames, list, keyName);
 
-        writeLogBatchUpdate(tableName, sets, setNames, list, result);
-        return result;
+            writeLogBatchUpdate(tableName, sets, setNames, list, keyName, result);
+            return result;
+        } catch (Throwable ex) {
+            writeLogBatchUpdate(tableName, sets, setNames, list, keyName, ex);
+            throw new Database.UpdateException(tableName, ex);
+        }
     }
 
     /**
      * DELETE
      *
      * @param tableName DELETE FROM table
-     * @param idValue   Primary Key Value
+     * @param keyValue  Key Value
+     * @param keyName   Key Name
      * @return AFFECTED ROWS
      */
-    public int delete(@NotNull String tableName, @NotNull Value idValue) {
-        Schema tableSchema = getTableSchema(tableName);
-        List<BaseFilter> filters = parseId(tableSchema, idValue);
-        int result = delete(tableName, filters);
+    public int delete(@NotNull String tableName, @NotNull Value keyValue, @Nullable String keyName) {
+        try {
+            List<BaseFilter> filters = parseKey(tableName, keyValue, keyName);
+            int result = delete(tableName, filters);
 
-        writeLogDelete(tableName, idValue, result);
-        return result;
+            writeLogDelete(tableName, keyValue, keyName, result);
+            return result;
+        } catch (Throwable ex) {
+            writeLogDelete(tableName, keyValue, keyName, ex);
+            throw new Database.DeleteException(tableName, ex);
+        }
     }
 
     /**
@@ -246,43 +284,92 @@ public class Database {
      * @return AFFECTED ROWS
      */
     public int delete(@NotNull String tableName, List<BaseFilter> filters) {
-        int result = template.delete(tableName, filters);
+        try {
+            int result = template.delete(tableName, filters);
 
-        writeLogDelete(tableName, filters, result);
+            writeLogDelete(tableName, filters, result);
+            return result;
+        } catch (Throwable ex) {
+            writeLogDelete(tableName, filters, ex);
+            throw new Database.DeleteException(tableName, ex);
+        }
+    }
+
+    /**
+     * Parse Set Names
+     *
+     * @param tableSchema the {@link Schema} instance
+     * @param setValues   [ Set Name : Set Value ]
+     * @return [ Set Name ]
+     */
+    @NotNull
+    public List<String> parseSetNames(@NotNull Schema tableSchema, Map<String, Value> setValues) {
+        List<String> result = new ArrayList<>();
+        if (setValues == null) {
+            return result;
+        }
+
+        Set<String> columnNames = tableSchema.getColumnNamesOnUpdate();
+        for (Map.Entry<String, Value> entry : setValues.entrySet()) {
+            if (entry == null) {
+                continue;
+            }
+
+            String columnName = entry.getKey();
+            if (columnName == null) {
+                continue;
+            }
+
+            Value value = entry.getValue();
+            if (value == null) {
+                continue;
+            }
+
+            if (columnNames.contains(columnName)) {
+                result.add(columnName);
+            }
+        }
+
         return result;
     }
 
     /**
-     * PARSE PRIMARY KEY
+     * Key = :Key
      *
-     * @param tableSchema the {@link Schema} instance
-     * @param idValue     Primary Key Value
+     * @param tableName Table Name
+     * @param keyValue  Key Value
+     * @param keyName   Key Name
      * @return [ the {@link BaseFilter} instance ]
      */
     @NotNull
-    public List<BaseFilter> parseId(@NotNull Schema tableSchema, @NotNull Value idValue) {
-        Template template = getTemplate();
-
-        String idName = getIdName(tableSchema);
-        ExpressionFilter filter = template.parseId(idName, idValue);
-
-        return Collections.singletonList(filter);
+    public List<BaseFilter> parseKey(@NotNull String tableName, @NotNull Value keyValue, @Nullable String keyName) {
+        Schema tableSchema = getTableSchema(tableName);
+        return parseKey(tableSchema, keyValue, keyName);
     }
 
     /**
-     * PARSE PRIMARY KEY
+     * Key = :Key
      *
      * @param tableSchema the {@link Schema} instance
+     * @param keyValue    Key Value
+     * @param keyName     Key Name
      * @return [ the {@link BaseFilter} instance ]
      */
     @NotNull
-    public List<BaseFilter> parseId(@NotNull Schema tableSchema) {
-        Template template = getTemplate();
+    public List<BaseFilter> parseKey(@NotNull Schema tableSchema, @NotNull Value keyValue, @Nullable String keyName) {
+        return KeyParser.parseList(tableSchema, keyValue, keyName);
+    }
 
-        String idName = getIdName(tableSchema);
-        ExpressionFilter filter = template.parseId(idName);
-
-        return Collections.singletonList(filter);
+    /**
+     * PRIMARY KEY
+     *
+     * @param tableName Table Name
+     * @return Primary Key Name
+     */
+    @NotEmpty
+    public String getIdName(@NotNull String tableName) {
+        Schema tableSchema = getTableSchema(tableName);
+        return getIdName(tableSchema);
     }
 
     /**
@@ -336,6 +423,25 @@ public class Database {
     }
 
     /**
+     * SELECT LIST
+     *
+     * @param tableName FROM table
+     * @param filters   [ the {@link BaseFilter} instance ]
+     * @param orders    [ the {@link Order} instance ]
+     * @param page      the {@link Page} instance
+     * @param ex        the {@link Throwable} instance
+     */
+    protected void writeLogSelectList(String tableName, List<BaseFilter> filters, List<Order> orders, Page page, Throwable ex) {
+        try {
+            LogWriter.Database logWriter = getLogWriter();
+            if (logWriter != null) {
+                logWriter.selectList(tableName, filters, orders, page, ex);
+            }
+        } catch (Throwable ignored) {
+        }
+    }
+
+    /**
      * SELECT COUNT
      *
      * @param tableName FROM table
@@ -353,17 +459,53 @@ public class Database {
     }
 
     /**
-     * SELECT ONE
+     * SELECT COUNT
      *
      * @param tableName FROM table
-     * @param idValue   Primary Key Value
-     * @param result    [ Column Name : Column Value ]
+     * @param filters   [ the {@link BaseFilter} instance ]
+     * @param ex        the {@link Throwable} instance
      */
-    protected void writeLogSelectOne(String tableName, Value idValue, Map<String, Value> result) {
+    protected void writeLogSelectCount(String tableName, List<BaseFilter> filters, Throwable ex) {
         try {
             LogWriter.Database logWriter = getLogWriter();
             if (logWriter != null) {
-                logWriter.selectOne(tableName, idValue, result);
+                logWriter.selectCount(tableName, filters, ex);
+            }
+        } catch (Throwable ignored) {
+        }
+    }
+
+    /**
+     * SELECT ONE
+     *
+     * @param tableName FROM table
+     * @param keyValue  Key Value
+     * @param keyName   Key Name
+     * @param result    [ Column Name : Column Value ]
+     */
+    protected void writeLogSelectOne(String tableName, Value keyValue, String keyName, Map<String, Value> result) {
+        try {
+            LogWriter.Database logWriter = getLogWriter();
+            if (logWriter != null) {
+                logWriter.selectOne(tableName, keyValue, keyName, result);
+            }
+        } catch (Throwable ignored) {
+        }
+    }
+
+    /**
+     * SELECT ONE
+     *
+     * @param tableName FROM table
+     * @param keyValue  Key Value
+     * @param keyName   Key Name
+     * @param ex        the {@link Throwable} instance
+     */
+    protected void writeLogSelectOne(String tableName, Value keyValue, String keyName, Throwable ex) {
+        try {
+            LogWriter.Database logWriter = getLogWriter();
+            if (logWriter != null) {
+                logWriter.selectOne(tableName, keyValue, keyName, ex);
             }
         } catch (Throwable ignored) {
         }
@@ -388,6 +530,24 @@ public class Database {
     }
 
     /**
+     * SELECT ONE
+     *
+     * @param tableName FROM table
+     * @param filters   [ the {@link BaseFilter} instance ]
+     * @param orders    [ the {@link Order} instance ]
+     * @param ex        the {@link Throwable} instance
+     */
+    protected void writeLogSelectOne(String tableName, List<BaseFilter> filters, List<Order> orders, Throwable ex) {
+        try {
+            LogWriter.Database logWriter = getLogWriter();
+            if (logWriter != null) {
+                logWriter.selectOne(tableName, filters, orders, ex);
+            }
+        } catch (Throwable ignored) {
+        }
+    }
+
+    /**
      * CHECK EXIST
      *
      * @param tableName FROM table
@@ -399,6 +559,23 @@ public class Database {
             LogWriter.Database logWriter = getLogWriter();
             if (logWriter != null) {
                 logWriter.checkExist(tableName, filters, result);
+            }
+        } catch (Throwable ignored) {
+        }
+    }
+
+    /**
+     * CHECK EXIST
+     *
+     * @param tableName FROM table
+     * @param filters   [ the {@link BaseFilter} instance ]
+     * @param ex        the {@link Throwable} instance
+     */
+    protected void writeLogCheckExist(String tableName, List<BaseFilter> filters, Throwable ex) {
+        try {
+            LogWriter.Database logWriter = getLogWriter();
+            if (logWriter != null) {
+                logWriter.checkExist(tableName, filters, ex);
             }
         } catch (Throwable ignored) {
         }
@@ -422,6 +599,23 @@ public class Database {
     }
 
     /**
+     * INSERT
+     *
+     * @param tableName INSERT INTO table
+     * @param values    [ Column Name : Column Value ]
+     * @param ex        the {@link Throwable} instance
+     */
+    protected void writeLogInsert(String tableName, Map<String, Value> values, Throwable ex) {
+        try {
+            LogWriter.Database logWriter = getLogWriter();
+            if (logWriter != null) {
+                logWriter.insert(tableName, values, ex);
+            }
+        } catch (Throwable ignored) {
+        }
+    }
+
+    /**
      * BATCH INSERT
      *
      * @param tableName INSERT INTO table
@@ -439,19 +633,57 @@ public class Database {
     }
 
     /**
-     * UPDATE
+     * BATCH INSERT
      *
-     * @param tableName UPDATE table
-     * @param idValue   Primary Key Value
-     * @param sets      [ column = column + 1 ]
-     * @param setValues [ Set Name : Set Value ]
-     * @param result    AFFECTED ROWS
+     * @param tableName INSERT INTO table
+     * @param list      [ [ Column Name : Column Value ] ]
+     * @param ex        the {@link Throwable} instance
      */
-    protected void writeLogUpdate(String tableName, Value idValue, List<String> sets, Map<String, Value> setValues, int result) {
+    protected void writeLogBatchInsert(String tableName, List<Map<String, Value>> list, Throwable ex) {
         try {
             LogWriter.Database logWriter = getLogWriter();
             if (logWriter != null) {
-                logWriter.update(tableName, idValue, sets, setValues, result);
+                logWriter.batchInsert(tableName, list, ex);
+            }
+        } catch (Throwable ignored) {
+        }
+    }
+
+    /**
+     * UPDATE
+     *
+     * @param tableName UPDATE table
+     * @param keyValue  Key Value
+     * @param sets      [ column = column + 1 ]
+     * @param setValues [ Set Name : Set Value ]
+     * @param keyName   Key Name
+     * @param result    AFFECTED ROWS
+     */
+    protected void writeLogUpdate(String tableName, Value keyValue, List<String> sets, Map<String, Value> setValues, String keyName, int result) {
+        try {
+            LogWriter.Database logWriter = getLogWriter();
+            if (logWriter != null) {
+                logWriter.update(tableName, keyValue, sets, setValues, keyName, result);
+            }
+        } catch (Throwable ignored) {
+        }
+    }
+
+    /**
+     * UPDATE
+     *
+     * @param tableName UPDATE table
+     * @param keyValue  Key Value
+     * @param sets      [ column = column + 1 ]
+     * @param setValues [ Set Name : Set Value ]
+     * @param keyName   Key Name
+     * @param ex        the {@link Throwable} instance
+     */
+    protected void writeLogUpdate(String tableName, Value keyValue, List<String> sets, Map<String, Value> setValues, String keyName, Throwable ex) {
+        try {
+            LogWriter.Database logWriter = getLogWriter();
+            if (logWriter != null) {
+                logWriter.update(tableName, keyValue, sets, setValues, keyName, ex);
             }
         } catch (Throwable ignored) {
         }
@@ -477,19 +709,59 @@ public class Database {
     }
 
     /**
+     * UPDATE
+     *
+     * @param tableName UPDATE table
+     * @param sets      [ column = column + 1 ]
+     * @param setValues [ Set Name : Set Value ]
+     * @param filters   [ the {@link BaseFilter} instance ]
+     * @param ex        the {@link Throwable} instance
+     */
+    protected void writeLogUpdate(String tableName, List<String> sets, Map<String, Value> setValues, List<BaseFilter> filters, Throwable ex) {
+        try {
+            LogWriter.Database logWriter = getLogWriter();
+            if (logWriter != null) {
+                logWriter.update(tableName, sets, setValues, filters, ex);
+            }
+        } catch (Throwable ignored) {
+        }
+    }
+
+    /**
      * BATCH UPDATE
      *
      * @param tableName UPDATE table
      * @param sets      [ column = column + 1 ]
      * @param setNames  [ Set Name ]
      * @param list      [ [ Parameter Name : Parameter Value ] ]
+     * @param keyName   Key Name
      * @param result    AFFECTED ROWS
      */
-    protected void writeLogBatchUpdate(String tableName, List<String> sets, List<String> setNames, List<Map<String, Value>> list, int[] result) {
+    protected void writeLogBatchUpdate(String tableName, List<String> sets, List<String> setNames, List<Map<String, Value>> list, String keyName, int[] result) {
         try {
             LogWriter.Database logWriter = getLogWriter();
             if (logWriter != null) {
-                logWriter.batchUpdate(tableName, sets, setNames, list, result);
+                logWriter.batchUpdate(tableName, sets, setNames, list, keyName, result);
+            }
+        } catch (Throwable ignored) {
+        }
+    }
+
+    /**
+     * BATCH UPDATE
+     *
+     * @param tableName UPDATE table
+     * @param sets      [ column = column + 1 ]
+     * @param setNames  [ Set Name ]
+     * @param list      [ [ Parameter Name : Parameter Value ] ]
+     * @param keyName   Key Name
+     * @param ex        the {@link Throwable} instance
+     */
+    protected void writeLogBatchUpdate(String tableName, List<String> sets, List<String> setNames, List<Map<String, Value>> list, String keyName, Throwable ex) {
+        try {
+            LogWriter.Database logWriter = getLogWriter();
+            if (logWriter != null) {
+                logWriter.batchUpdate(tableName, sets, setNames, list, keyName, ex);
             }
         } catch (Throwable ignored) {
         }
@@ -499,14 +771,33 @@ public class Database {
      * DELETE
      *
      * @param tableName DELETE FROM table
-     * @param idValue   Primary Key Value
+     * @param keyValue  Key Value
+     * @param keyName   Key Name
      * @param result    AFFECTED ROWS
      */
-    protected void writeLogDelete(String tableName, Value idValue, int result) {
+    protected void writeLogDelete(String tableName, Value keyValue, String keyName, int result) {
         try {
             LogWriter.Database logWriter = getLogWriter();
             if (logWriter != null) {
-                logWriter.delete(tableName, idValue, result);
+                logWriter.delete(tableName, keyValue, keyName, result);
+            }
+        } catch (Throwable ignored) {
+        }
+    }
+
+    /**
+     * DELETE
+     *
+     * @param tableName DELETE FROM table
+     * @param keyValue  Key Value
+     * @param keyName   Key Name
+     * @param ex        the {@link Throwable} instance
+     */
+    protected void writeLogDelete(String tableName, Value keyValue, String keyName, Throwable ex) {
+        try {
+            LogWriter.Database logWriter = getLogWriter();
+            if (logWriter != null) {
+                logWriter.delete(tableName, keyValue, keyName, ex);
             }
         } catch (Throwable ignored) {
         }
@@ -530,6 +821,23 @@ public class Database {
     }
 
     /**
+     * DELETE
+     *
+     * @param tableName DELETE FROM table
+     * @param filters   [ the {@link BaseFilter} instance ]
+     * @param ex        the {@link Throwable} instance
+     */
+    protected void writeLogDelete(String tableName, List<BaseFilter> filters, Throwable ex) {
+        try {
+            LogWriter.Database logWriter = getLogWriter();
+            if (logWriter != null) {
+                logWriter.delete(tableName, filters, ex);
+            }
+        } catch (Throwable ignored) {
+        }
+    }
+
+    /**
      * Log Writer
      *
      * @return the {@link LogWriter.Database} instance
@@ -537,6 +845,78 @@ public class Database {
     @Nullable
     protected LogWriter.Database getLogWriter() {
         return LogWriter.getDatabase();
+    }
+
+    /**
+     * 查询异常
+     */
+    public static class SelectException extends RuntimeException {
+
+        private final String tableName;
+
+        public SelectException(String tableName, Throwable cause) {
+            super(cause);
+            this.tableName = tableName;
+        }
+
+        public String getTableName() {
+            return tableName;
+        }
+
+    }
+
+    /**
+     * 新增异常
+     */
+    public static class InsertException extends RuntimeException {
+
+        private final String tableName;
+
+        public InsertException(String tableName, Throwable cause) {
+            super(cause);
+            this.tableName = tableName;
+        }
+
+        public String getTableName() {
+            return tableName;
+        }
+
+    }
+
+    /**
+     * 修改异常
+     */
+    public static class UpdateException extends RuntimeException {
+
+        private final String tableName;
+
+        public UpdateException(String tableName, Throwable cause) {
+            super(cause);
+            this.tableName = tableName;
+        }
+
+        public String getTableName() {
+            return tableName;
+        }
+
+    }
+
+    /**
+     * 删除异常
+     */
+    public static class DeleteException extends RuntimeException {
+
+        private final String tableName;
+
+        public DeleteException(String tableName, Throwable cause) {
+            super(cause);
+            this.tableName = tableName;
+        }
+
+        public String getTableName() {
+            return tableName;
+        }
+
     }
 
 }

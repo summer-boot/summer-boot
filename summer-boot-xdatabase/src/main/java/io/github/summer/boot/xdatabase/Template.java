@@ -1,7 +1,8 @@
 package io.github.summer.boot.xdatabase;
 
-import io.github.summer.boot.filter.*;
-import io.github.summer.boot.value.Parameter;
+import io.github.summer.boot.filter.BaseFilter;
+import io.github.summer.boot.filter.Order;
+import io.github.summer.boot.filter.Page;
 import io.github.summer.boot.value.Value;
 import io.github.summer.boot.value.ValueType;
 import io.github.summer.boot.xdatabase.sql.SqlParserImpl;
@@ -11,7 +12,6 @@ import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotNull;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -232,24 +232,27 @@ public class Template {
      * @param sets     [ column = column + 1 ]
      * @param setNames [ Set Name ]
      * @param list     [ [ Parameter Name : Parameter Value ] ]
+     * @param keyName  Key Name
      * @return AFFECTED ROWS
      */
     public int[] batchUpdate(@NotNull Schema schema,
                              List<String> sets, List<String> setNames,
-                             List<Map<String, Value>> list) {
+                             List<Map<String, Value>> list,
+                             @Nullable String keyName) {
         String tableName = schema.getTableName();
-
-        String idName = schema.getIdName();
+        String idName = keyName != null ? keyName.trim() : schema.getIdName();
         Preconditions.requireNonEmpty(idName, "idName must not be empty, tableName: " + tableName);
+
+        if (setNames != null) {
+            setNames.remove(idName);
+        }
 
         List<String> parameterNames = setNames != null ? new ArrayList<>(setNames) : new ArrayList<>();
         parameterNames.add(idName);
 
-        ExpressionFilter idFilter = parseId(idName);
-        List<BaseFilter> filters = Collections.singletonList(idFilter);
-
         SqlParser sqlParser = getSqlParser();
         String joinedSets = joinSets(sets, setNames);
+        List<BaseFilter> filters = KeyParser.parseList(idName);
         SqlParameter sqlParameter = sqlParser.parseUpdate(tableName, joinedSets, filters);
 
         sqlParameter.setParameterNames(parameterNames);
@@ -258,7 +261,7 @@ public class Template {
         Executor executor = getExecutor();
         int[] result = executor.batchUpdate(sqlParameter);
 
-        writeLogBatchUpdate(schema, sets, setNames, list, result);
+        writeLogBatchUpdate(schema, sets, setNames, list, keyName, result);
         return result;
     }
 
@@ -377,42 +380,6 @@ public class Template {
 
         SqlParser sqlParser = getSqlParser();
         return sqlParser.parseInsert(tableName, columns, values, batchSize);
-    }
-
-    /**
-     * Parse Primary Key = ?
-     *
-     * @param idName  Primary Key Name
-     * @param idValue Primary Key Value
-     * @return the {@link ExpressionFilter} instance
-     */
-    @NotNull
-    public ExpressionFilter parseId(@NotNull String idName, @NotNull Value idValue) {
-        Parameter parameter = new Parameter();
-        parameter.setName(idName);
-        parameter.setValue(idValue);
-
-        ExpressionFilter filter = parseId(idName);
-        filter.setParameter(parameter);
-
-        return filter;
-    }
-
-    /**
-     * Parse Primary Key = ?
-     *
-     * @param idName Primary Key Name
-     * @return the {@link ExpressionFilter} instance
-     */
-    @NotNull
-    public ExpressionFilter parseId(@NotNull String idName) {
-        Preconditions.requireNonEmpty(idName, "idName must not be empty");
-
-        ExpressionFilter filter = new ExpressionFilter();
-        filter.setName(idName);
-        filter.setCode(ExpressionCode.EQ);
-
-        return filter;
     }
 
     @NotNull
@@ -557,13 +524,14 @@ public class Template {
      * @param sets     [ column = column + 1 ]
      * @param setNames [ Set Name ]
      * @param list     [ [ Parameter Name : Parameter Value ] ]
+     * @param keyName  Key Name
      * @param result   AFFECTED ROWS
      */
-    protected void writeLogBatchUpdate(Schema schema, List<String> sets, List<String> setNames, List<Map<String, Value>> list, int[] result) {
+    protected void writeLogBatchUpdate(Schema schema, List<String> sets, List<String> setNames, List<Map<String, Value>> list, String keyName, int[] result) {
         try {
             LogWriter.Template logWriter = getLogWriter();
             if (logWriter != null) {
-                logWriter.batchUpdate(schema, sets, setNames, list, result);
+                logWriter.batchUpdate(schema, sets, setNames, list, keyName, result);
             }
         } catch (Throwable ignored) {
         }

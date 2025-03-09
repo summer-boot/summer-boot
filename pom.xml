@@ -211,6 +211,7 @@
         <module>summer-boot-database-starter</module>
         <module>summer-boot-xdatabase</module>
         <module>summer-boot-redis</module>
+        <module>summer-boot-xrepository</module>
         <module>summer-boot-elastic</module>
         <module>summer-boot-kafka</module>
         <module>summer-boot-binlog</module>
