@@ -78,7 +78,7 @@ public class Database {
      *
      * @param tableName FROM table
      * @param keyValue  Key Value
-     * @param keyName   Key Name
+     * @param keyName   Key Name, if null ? Primary Key
      * @return [ Column Name : Column Value ]
      */
     public Map<String, Value> selectOne(@NotNull String tableName,
@@ -185,7 +185,7 @@ public class Database {
      * @param keyValue  Key Value
      * @param sets      [ column = column + 1 ]
      * @param setValues [ Set Name : Set Value ]
-     * @param keyName   Key Name
+     * @param keyName   Key Name, if null ? Primary Key
      * @return AFFECTED ROWS
      */
     public int update(@NotNull String tableName,
@@ -236,7 +236,7 @@ public class Database {
      * @param sets      [ column = column + 1 ]
      * @param setNames  [ Set Name ]
      * @param list      [ [ Parameter Name : Parameter Value ] ]
-     * @param keyName   Key Name
+     * @param keyName   Key Name, if null ? Primary Key
      * @return AFFECTED ROWS
      */
     public int[] batchUpdate(@NotNull String tableName,
@@ -260,7 +260,7 @@ public class Database {
      *
      * @param tableName DELETE FROM table
      * @param keyValue  Key Value
-     * @param keyName   Key Name
+     * @param keyName   Key Name, if null ? Primary Key
      * @return AFFECTED ROWS
      */
     public int delete(@NotNull String tableName, @NotNull Value keyValue, @Nullable String keyName) {
@@ -338,7 +338,7 @@ public class Database {
      *
      * @param tableName Table Name
      * @param keyValue  Key Value
-     * @param keyName   Key Name
+     * @param keyName   Key Name, if null ? Primary Key
      * @return [ the {@link BaseFilter} instance ]
      */
     @NotNull
@@ -352,7 +352,7 @@ public class Database {
      *
      * @param tableSchema the {@link Schema} instance
      * @param keyValue    Key Value
-     * @param keyName     Key Name
+     * @param keyName     Key Name, if null ? Primary Key
      * @return [ the {@link BaseFilter} instance ]
      */
     @NotNull

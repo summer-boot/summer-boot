@@ -232,7 +232,7 @@ public class Template {
      * @param sets     [ column = column + 1 ]
      * @param setNames [ Set Name ]
      * @param list     [ [ Parameter Name : Parameter Value ] ]
-     * @param keyName  Key Name
+     * @param keyName  Key Name, if null ? Primary Key
      * @return AFFECTED ROWS
      */
     public int[] batchUpdate(@NotNull Schema schema,
