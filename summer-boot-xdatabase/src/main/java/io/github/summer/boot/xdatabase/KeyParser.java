@@ -3,8 +3,10 @@ package io.github.summer.boot.xdatabase;
 import io.github.summer.boot.filter.BaseFilter;
 import io.github.summer.boot.filter.ExpressionCode;
 import io.github.summer.boot.filter.ExpressionFilter;
+import io.github.summer.boot.sql.Preconditions;
 import io.github.summer.boot.value.Parameter;
 import io.github.summer.boot.value.Value;
+import io.github.summer.boot.xdatabase.schema.TableSchema;
 import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotNull;
 
@@ -24,13 +26,13 @@ public final class KeyParser {
     /**
      * Key = :Key
      *
-     * @param tableSchema the {@link Schema} instance
+     * @param tableSchema the {@link TableSchema} instance
      * @param keyValue    Key Value
      * @param keyName     Key Name
      * @return [ the {@link BaseFilter} instance ]
      */
     @NotNull
-    public static List<BaseFilter> parseList(@NotNull Schema tableSchema, @NotNull Value keyValue, @Nullable String keyName) {
+    public static List<BaseFilter> parseList(@NotNull TableSchema tableSchema, @NotNull Value keyValue, @Nullable String keyName) {
         ExpressionFilter filter = parse(tableSchema, keyValue, keyName);
         return Collections.singletonList(filter);
     }
@@ -51,13 +53,13 @@ public final class KeyParser {
     /**
      * Key = :Key
      *
-     * @param tableSchema the {@link Schema} instance
+     * @param tableSchema the {@link TableSchema} instance
      * @param keyValue    Key Value
      * @param keyName     Key Name
      * @return the {@link ExpressionFilter} instance
      */
     @NotNull
-    public static ExpressionFilter parse(@NotNull Schema tableSchema, @NotNull Value keyValue, @Nullable String keyName) {
+    public static ExpressionFilter parse(@NotNull TableSchema tableSchema, @NotNull Value keyValue, @Nullable String keyName) {
         String name = keyName != null ? keyName.trim() : tableSchema.getIdName();
         return parse(name, keyValue);
     }
@@ -84,12 +86,12 @@ public final class KeyParser {
     /**
      * Key = ?
      *
-     * @param tableSchema the {@link Schema} instance
+     * @param tableSchema the {@link TableSchema} instance
      * @param keyName     Key Name
      * @return [ the {@link BaseFilter} instance ]
      */
     @NotNull
-    public static List<BaseFilter> parseList(@NotNull Schema tableSchema, @Nullable String keyName) {
+    public static List<BaseFilter> parseList(@NotNull TableSchema tableSchema, @Nullable String keyName) {
         ExpressionFilter filter = parse(tableSchema, keyName);
         return Collections.singletonList(filter);
     }
@@ -109,12 +111,12 @@ public final class KeyParser {
     /**
      * Key = ?
      *
-     * @param tableSchema the {@link Schema} instance
+     * @param tableSchema the {@link TableSchema} instance
      * @param keyName     Key Name
      * @return the {@link ExpressionFilter} instance
      */
     @NotNull
-    public static ExpressionFilter parse(@NotNull Schema tableSchema, @Nullable String keyName) {
+    public static ExpressionFilter parse(@NotNull TableSchema tableSchema, @Nullable String keyName) {
         String name = keyName != null ? keyName.trim() : tableSchema.getIdName();
         return parse(name);
     }

@@ -3,9 +3,14 @@ package io.github.summer.boot.xdatabase;
 import io.github.summer.boot.filter.BaseFilter;
 import io.github.summer.boot.filter.Order;
 import io.github.summer.boot.filter.Page;
+import io.github.summer.boot.sql.Preconditions;
+import io.github.summer.boot.sql.SqlParameter;
+import io.github.summer.boot.sql.SqlParser;
+import io.github.summer.boot.sql.SqlParserImpl;
 import io.github.summer.boot.value.Value;
 import io.github.summer.boot.value.ValueType;
-import io.github.summer.boot.xdatabase.sql.SqlParserImpl;
+import io.github.summer.boot.xdatabase.logger.LogTemplate;
+import io.github.summer.boot.xdatabase.schema.TableSchema;
 import io.github.summer.boot.xdatabase.value.DefaultValues;
 import io.github.summer.boot.xdatabase.value.PlaceholderValues;
 import jakarta.annotation.Nullable;
@@ -54,23 +59,23 @@ public class Template {
     /**
      * SELECT LIST
      *
-     * @param schema  the {@link Schema} instance
-     * @param filters [ the {@link BaseFilter} instance ]
-     * @param orders  [ the {@link Order} instance ]
-     * @param page    the {@link Page} instance
+     * @param tableSchema the {@link TableSchema} instance
+     * @param filters     [ the {@link BaseFilter} instance ]
+     * @param orders      [ the {@link Order} instance ]
+     * @param page        the {@link Page} instance
      * @return [ [ Column Name : Column Value ] ]
      */
-    public List<Map<String, Value>> selectList(@NotNull Schema schema,
+    public List<Map<String, Value>> selectList(@NotNull TableSchema tableSchema,
                                                List<BaseFilter> filters, List<Order> orders, Page page) {
-        SqlParameter sqlParameter = parseSelect(schema, filters, orders, page);
+        SqlParameter sqlParameter = parseSelect(tableSchema, filters, orders, page);
 
-        List<String> columnNames = schema.getColumnNames();
-        Map<String, Integer> valueTypes = schema.getValueTypes();
+        List<String> columnNames = tableSchema.getColumnNames();
+        Map<String, Integer> valueTypes = tableSchema.getValueTypes();
 
         Executor executor = getExecutor();
         List<Map<String, Value>> result = executor.selectList(sqlParameter, columnNames, valueTypes);
 
-        writeLogSelectList(schema, filters, orders, page, result);
+        writeLogSelectList(tableSchema, filters, orders, page, result);
         return result;
     }
 
@@ -95,25 +100,25 @@ public class Template {
     /**
      * SELECT ONE
      *
-     * @param schema  the {@link Schema} instance
-     * @param filters [ the {@link BaseFilter} instance ]
-     * @param orders  [ the {@link Order} instance ]
+     * @param tableSchema the {@link TableSchema} instance
+     * @param filters     [ the {@link BaseFilter} instance ]
+     * @param orders      [ the {@link Order} instance ]
      * @return [ Column Name : Column Value ]
      */
-    public Map<String, Value> selectOne(@NotNull Schema schema,
+    public Map<String, Value> selectOne(@NotNull TableSchema tableSchema,
                                         List<BaseFilter> filters, List<Order> orders) {
         Page page = new Page();
         page.setLimit(1);
 
-        SqlParameter sqlParameter = parseSelect(schema, filters, orders, page);
+        SqlParameter sqlParameter = parseSelect(tableSchema, filters, orders, page);
 
-        List<String> columnNames = schema.getColumnNames();
-        Map<String, Integer> valueTypes = schema.getValueTypes();
+        List<String> columnNames = tableSchema.getColumnNames();
+        Map<String, Integer> valueTypes = tableSchema.getValueTypes();
 
         Executor executor = getExecutor();
         Map<String, Value> result = executor.selectOne(sqlParameter, columnNames, valueTypes);
 
-        writeLogSelectOne(schema, filters, orders, result);
+        writeLogSelectOne(tableSchema, filters, orders, result);
         return result;
     }
 
@@ -141,38 +146,38 @@ public class Template {
     /**
      * INSERT
      *
-     * @param schema the {@link Schema} instance
-     * @param values [ Column Name : Column Value ]
+     * @param tableSchema the {@link TableSchema} instance
+     * @param values      [ Column Name : Column Value ]
      * @return AFFECTED ROWS
      */
-    public int insert(@NotNull Schema schema, @NotNull Map<String, Value> values) {
+    public int insert(@NotNull TableSchema tableSchema, @NotNull Map<String, Value> values) {
         SqlParameter sqlParameter = new SqlParameter();
 
-        String sql = parseInsert(schema, 1);
+        String sql = parseInsert(tableSchema, 1);
         sqlParameter.setSql(sql);
 
-        List<String> parameterNames = schema.getColumnNamesOnInsert();
+        List<String> parameterNames = tableSchema.getColumnNamesOnInsert();
         sqlParameter.setParameterNames(parameterNames);
 
-        Map<String, Value> parameters = setDefaultValuesOnInsert(schema, values);
+        Map<String, Value> parameters = setDefaultValuesOnInsert(tableSchema, values);
         sqlParameter.setParameters(parameters);
 
         Executor executor = getExecutor();
         int result = executor.update(sqlParameter);
 
-        writeLogInsert(schema, values, result);
+        writeLogInsert(tableSchema, values, result);
         return result;
     }
 
     /**
      * BATCH INSERT
      *
-     * @param schema the {@link Schema} instance
-     * @param list   [ [ Column Name : Column Value ] ]
+     * @param tableSchema the {@link TableSchema} instance
+     * @param list        [ [ Column Name : Column Value ] ]
      * @return AFFECTED ROWS
      */
-    public int batchInsert(@NotNull Schema schema, @NotNull List<Map<String, Value>> list) {
-        List<Map<String, Value>> parametersList = setDefaultValuesOnInsert(schema, list);
+    public int batchInsert(@NotNull TableSchema tableSchema, @NotNull List<Map<String, Value>> list) {
+        List<Map<String, Value>> parametersList = setDefaultValuesOnInsert(tableSchema, list);
         int batchSize = parametersList.size();
         if (batchSize == 0) {
             return 0;
@@ -180,10 +185,10 @@ public class Template {
 
         SqlParameter sqlParameter = new SqlParameter();
 
-        String sql = parseInsert(schema, batchSize);
+        String sql = parseInsert(tableSchema, batchSize);
         sqlParameter.setSql(sql);
 
-        List<String> parameterNames = schema.getColumnNamesOnInsert();
+        List<String> parameterNames = tableSchema.getColumnNamesOnInsert();
         sqlParameter.setParameterNames(parameterNames);
 
         sqlParameter.setParametersList(parametersList);
@@ -191,7 +196,7 @@ public class Template {
         Executor executor = getExecutor();
         int result = executor.updateList(sqlParameter);
 
-        writeLogBatchInsert(schema, list, result);
+        writeLogBatchInsert(tableSchema, list, result);
         return result;
     }
 
@@ -228,19 +233,19 @@ public class Template {
     /**
      * BATCH UPDATE, No Transactional
      *
-     * @param schema   the {@link Schema} instance
-     * @param sets     [ column = column + 1 ]
-     * @param setNames [ Set Name ]
-     * @param list     [ [ Parameter Name : Parameter Value ] ]
-     * @param keyName  Key Name, if null ? Primary Key
+     * @param tableSchema the {@link TableSchema} instance
+     * @param sets        [ column = column + 1 ]
+     * @param setNames    [ Set Name ]
+     * @param list        [ [ Parameter Name : Parameter Value ] ]
+     * @param keyName     Key Name, if null ? Primary Key
      * @return AFFECTED ROWS
      */
-    public int[] batchUpdate(@NotNull Schema schema,
+    public int[] batchUpdate(@NotNull TableSchema tableSchema,
                              List<String> sets, List<String> setNames,
                              List<Map<String, Value>> list,
                              @Nullable String keyName) {
-        String tableName = schema.getTableName();
-        String idName = keyName != null ? keyName.trim() : schema.getIdName();
+        String tableName = tableSchema.getTableName();
+        String idName = keyName != null ? keyName.trim() : tableSchema.getIdName();
         Preconditions.requireNonEmpty(idName, "idName must not be empty, tableName: " + tableName);
 
         if (setNames != null) {
@@ -261,7 +266,7 @@ public class Template {
         Executor executor = getExecutor();
         int[] result = executor.batchUpdate(sqlParameter);
 
-        writeLogBatchUpdate(schema, sets, setNames, list, keyName, result);
+        writeLogBatchUpdate(tableSchema, sets, setNames, list, keyName, result);
         return result;
     }
 
@@ -286,28 +291,28 @@ public class Template {
     /**
      * Set Default Values On Insert
      *
-     * @param schema the {@link Schema} instance
-     * @param list   [ [ Parameter Name : Parameter Value ] ]
+     * @param tableSchema the {@link TableSchema} instance
+     * @param list        [ [ Parameter Name : Parameter Value ] ]
      * @return [ [ Parameter Name : Parameter Value ] ]
      */
     @NotNull
-    public List<Map<String, Value>> setDefaultValuesOnInsert(@NotNull Schema schema, List<Map<String, Value>> list) {
-        List<String> columnNames = schema.getColumnNamesOnInsert();
-        Map<String, Value> defaultValues = schema.getDefaultValues();
+    public List<Map<String, Value>> setDefaultValuesOnInsert(@NotNull TableSchema tableSchema, List<Map<String, Value>> list) {
+        List<String> columnNames = tableSchema.getColumnNamesOnInsert();
+        Map<String, Value> defaultValues = tableSchema.getDefaultValues();
         return DefaultValues.setDefaultValues(columnNames, defaultValues, list);
     }
 
     /**
      * Set Default Values On Insert
      *
-     * @param schema the {@link Schema} instance
-     * @param values [ Parameter Name : Parameter Value ]
+     * @param tableSchema the {@link TableSchema} instance
+     * @param values      [ Parameter Name : Parameter Value ]
      * @return [ Parameter Name : Parameter Value ]
      */
     @NotNull
-    public Map<String, Value> setDefaultValuesOnInsert(@NotNull Schema schema, Map<String, Value> values) {
-        List<String> columnNames = schema.getColumnNamesOnInsert();
-        Map<String, Value> defaultValues = schema.getDefaultValues();
+    public Map<String, Value> setDefaultValuesOnInsert(@NotNull TableSchema tableSchema, Map<String, Value> values) {
+        List<String> columnNames = tableSchema.getColumnNamesOnInsert();
+        Map<String, Value> defaultValues = tableSchema.getDefaultValues();
         return DefaultValues.setDefaultValues(columnNames, defaultValues, values);
     }
 
@@ -333,17 +338,17 @@ public class Template {
     /**
      * SELECT column, column FROM table WHERE column = ? ORDER BY name ASC LIMIT offset, limit
      *
-     * @param schema  the {@link Schema} instance
-     * @param filters [ the {@link BaseFilter} instance ]
-     * @param orders  [ the {@link Order} instance ]
-     * @param page    the {@link Page} instance
+     * @param tableSchema the {@link TableSchema} instance
+     * @param filters     [ the {@link BaseFilter} instance ]
+     * @param orders      [ the {@link Order} instance ]
+     * @param page        the {@link Page} instance
      * @return the {@link SqlParameter} instance
      */
     @NotNull
-    public SqlParameter parseSelect(@NotNull Schema schema,
+    public SqlParameter parseSelect(@NotNull TableSchema tableSchema,
                                     List<BaseFilter> filters, List<Order> orders, Page page) {
-        String tableName = schema.getTableName();
-        String columns = schema.getColumns();
+        String tableName = tableSchema.getTableName();
+        String columns = tableSchema.getColumns();
         return parseSelect(tableName, columns, filters, orders, page);
     }
 
@@ -368,15 +373,15 @@ public class Template {
     /**
      * Parse Insert
      *
-     * @param schema    the {@link Schema} instance
-     * @param batchSize Batch Size
+     * @param tableSchema the {@link TableSchema} instance
+     * @param batchSize   Batch Size
      * @return INSERT INTO table (column, column) VALUES (?, ?), (?, ?), (?, ?)
      */
     @NotNull
-    public String parseInsert(@NotNull Schema schema, int batchSize) {
-        String tableName = schema.getTableName();
-        String columns = schema.getColumnsOnInsert();
-        String values = schema.getValuesOnInsert();
+    public String parseInsert(@NotNull TableSchema tableSchema, int batchSize) {
+        String tableName = tableSchema.getTableName();
+        String columns = tableSchema.getColumnsOnInsert();
+        String values = tableSchema.getValuesOnInsert();
 
         SqlParser sqlParser = getSqlParser();
         return sqlParser.parseInsert(tableName, columns, values, batchSize);
@@ -392,35 +397,19 @@ public class Template {
         return sqlParser;
     }
 
-    /**
-     * SELECT LIST
-     *
-     * @param schema  the {@link Schema} instance
-     * @param filters [ the {@link BaseFilter} instance ]
-     * @param orders  [ the {@link Order} instance ]
-     * @param page    the {@link Page} instance
-     * @param result  [ [ Column Name : Column Value ] ]
-     */
-    protected void writeLogSelectList(Schema schema, List<BaseFilter> filters, List<Order> orders, Page page, List<Map<String, Value>> result) {
+    protected void writeLogSelectList(TableSchema tableSchema, List<BaseFilter> filters, List<Order> orders, Page page, List<Map<String, Value>> result) {
         try {
-            LogWriter.Template logWriter = getLogWriter();
+            LogTemplate logWriter = getLogWriter();
             if (logWriter != null) {
-                logWriter.selectList(schema, filters, orders, page, result);
+                logWriter.selectList(tableSchema, filters, orders, page, result);
             }
         } catch (Throwable ignored) {
         }
     }
 
-    /**
-     * SELECT COUNT
-     *
-     * @param tableName FROM table
-     * @param filters   [ the {@link BaseFilter} instance ]
-     * @param result    AGGREGATE
-     */
     protected void writeLogSelectCount(String tableName, List<BaseFilter> filters, Long result) {
         try {
-            LogWriter.Template logWriter = getLogWriter();
+            LogTemplate logWriter = getLogWriter();
             if (logWriter != null) {
                 logWriter.selectCount(tableName, filters, result);
             }
@@ -428,34 +417,19 @@ public class Template {
         }
     }
 
-    /**
-     * SELECT ONE
-     *
-     * @param schema  the {@link Schema} instance
-     * @param filters [ the {@link BaseFilter} instance ]
-     * @param orders  [ the {@link Order} instance ]
-     * @param result  [ Column Name : Column Value ]
-     */
-    protected void writeLogSelectOne(Schema schema, List<BaseFilter> filters, List<Order> orders, Map<String, Value> result) {
+    protected void writeLogSelectOne(TableSchema tableSchema, List<BaseFilter> filters, List<Order> orders, Map<String, Value> result) {
         try {
-            LogWriter.Template logWriter = getLogWriter();
+            LogTemplate logWriter = getLogWriter();
             if (logWriter != null) {
-                logWriter.selectOne(schema, filters, orders, result);
+                logWriter.selectOne(tableSchema, filters, orders, result);
             }
         } catch (Throwable ignored) {
         }
     }
 
-    /**
-     * CHECK EXIST
-     *
-     * @param tableName FROM table
-     * @param filters   [ the {@link BaseFilter} instance ]
-     * @param result    EXIST ? 1 : null
-     */
     protected void writeLogCheckExist(String tableName, List<BaseFilter> filters, Integer result) {
         try {
-            LogWriter.Template logWriter = getLogWriter();
+            LogTemplate logWriter = getLogWriter();
             if (logWriter != null) {
                 logWriter.checkExist(tableName, filters, result);
             }
@@ -463,53 +437,29 @@ public class Template {
         }
     }
 
-    /**
-     * INSERT
-     *
-     * @param schema the {@link Schema} instance
-     * @param values [ Column Name : Column Value ]
-     * @param result AFFECTED ROWS
-     */
-    protected void writeLogInsert(Schema schema, Map<String, Value> values, int result) {
+    protected void writeLogInsert(TableSchema tableSchema, Map<String, Value> values, int result) {
         try {
-            LogWriter.Template logWriter = getLogWriter();
+            LogTemplate logWriter = getLogWriter();
             if (logWriter != null) {
-                logWriter.insert(schema, values, result);
+                logWriter.insert(tableSchema, values, result);
             }
         } catch (Throwable ignored) {
         }
     }
 
-    /**
-     * BATCH INSERT
-     *
-     * @param schema the {@link Schema} instance
-     * @param list   [ [ Column Name : Column Value ] ]
-     * @param result AFFECTED ROWS
-     */
-    protected void writeLogBatchInsert(Schema schema, List<Map<String, Value>> list, int result) {
+    protected void writeLogBatchInsert(TableSchema tableSchema, List<Map<String, Value>> list, int result) {
         try {
-            LogWriter.Template logWriter = getLogWriter();
+            LogTemplate logWriter = getLogWriter();
             if (logWriter != null) {
-                logWriter.batchInsert(schema, list, result);
+                logWriter.batchInsert(tableSchema, list, result);
             }
         } catch (Throwable ignored) {
         }
     }
 
-    /**
-     * UPDATE
-     *
-     * @param tableName UPDATE table
-     * @param sets      [ column = column + 1 ]
-     * @param setNames  [ Set Name ]
-     * @param setValues [ Set Name : Set Value ]
-     * @param filters   [ the {@link BaseFilter} instance ]
-     * @param result    AFFECTED ROWS
-     */
     protected void writeLogUpdate(String tableName, List<String> sets, List<String> setNames, Map<String, Value> setValues, List<BaseFilter> filters, int result) {
         try {
-            LogWriter.Template logWriter = getLogWriter();
+            LogTemplate logWriter = getLogWriter();
             if (logWriter != null) {
                 logWriter.update(tableName, sets, setNames, setValues, filters, result);
             }
@@ -517,36 +467,19 @@ public class Template {
         }
     }
 
-    /**
-     * BATCH UPDATE
-     *
-     * @param schema   the {@link Schema} instance
-     * @param sets     [ column = column + 1 ]
-     * @param setNames [ Set Name ]
-     * @param list     [ [ Parameter Name : Parameter Value ] ]
-     * @param keyName  Key Name
-     * @param result   AFFECTED ROWS
-     */
-    protected void writeLogBatchUpdate(Schema schema, List<String> sets, List<String> setNames, List<Map<String, Value>> list, String keyName, int[] result) {
+    protected void writeLogBatchUpdate(TableSchema tableSchema, List<String> sets, List<String> setNames, List<Map<String, Value>> list, String keyName, int[] result) {
         try {
-            LogWriter.Template logWriter = getLogWriter();
+            LogTemplate logWriter = getLogWriter();
             if (logWriter != null) {
-                logWriter.batchUpdate(schema, sets, setNames, list, keyName, result);
+                logWriter.batchUpdate(tableSchema, sets, setNames, list, keyName, result);
             }
         } catch (Throwable ignored) {
         }
     }
 
-    /**
-     * DELETE
-     *
-     * @param tableName DELETE FROM table
-     * @param filters   [ the {@link BaseFilter} instance ]
-     * @param result    AFFECTED ROWS
-     */
     protected void writeLogDelete(String tableName, List<BaseFilter> filters, int result) {
         try {
-            LogWriter.Template logWriter = getLogWriter();
+            LogTemplate logWriter = getLogWriter();
             if (logWriter != null) {
                 logWriter.delete(tableName, filters, result);
             }
@@ -557,10 +490,10 @@ public class Template {
     /**
      * Log Writer
      *
-     * @return the {@link LogWriter.Template} instance
+     * @return the {@link LogTemplate} instance
      */
     @Nullable
-    protected LogWriter.Template getLogWriter() {
+    protected LogTemplate getLogWriter() {
         return LogWriter.getTemplate();
     }
 

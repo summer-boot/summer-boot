@@ -1,9 +1,9 @@
 package io.github.summer.boot.xdatabase.value;
 
+import io.github.summer.boot.sql.Preconditions;
 import io.github.summer.boot.value.Types;
 import io.github.summer.boot.value.UnsupportedValueTypeException;
 import io.github.summer.boot.value.Value;
-import io.github.summer.boot.xdatabase.Preconditions;
 import jakarta.validation.constraints.NotNull;
 
 import java.math.BigDecimal;

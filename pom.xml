@@ -209,6 +209,8 @@
         <module>summer-boot-spi-subscriber</module>
         <module>summer-boot-database</module>
         <module>summer-boot-database-starter</module>
+        <module>summer-boot-sql</module>
+        <module>summer-boot-xtable</module>
         <module>summer-boot-xdatabase</module>
         <module>summer-boot-redis</module>
         <module>summer-boot-xrepository</module>

@@ -1,6 +1,9 @@
 package io.github.summer.boot.xdatabase;
 
+import io.github.summer.boot.sql.Preconditions;
+import io.github.summer.boot.sql.SqlParameter;
 import io.github.summer.boot.value.Value;
+import io.github.summer.boot.xdatabase.logger.LogExecutor;
 import io.github.summer.boot.xdatabase.value.ValueGetter;
 import io.github.summer.boot.xdatabase.value.ValueSetter;
 import jakarta.annotation.Nullable;
@@ -147,7 +150,7 @@ public class Executor {
      * UPDATE
      *
      * @param sqlParameter the {@link SqlParameter} instance
-     * @return Affected Rows
+     * @return AFFECTED ROWS
      */
     public int update(@NotNull SqlParameter sqlParameter) {
         JdbcTemplate jdbcTemplate = getJdbcTemplate();
@@ -174,7 +177,7 @@ public class Executor {
      * UPDATE LIST
      *
      * @param sqlParameter the {@link SqlParameter} instance
-     * @return Affected Rows
+     * @return AFFECTED ROWS
      */
     public int updateList(@NotNull SqlParameter sqlParameter) {
         JdbcTemplate jdbcTemplate = getJdbcTemplate();
@@ -201,7 +204,7 @@ public class Executor {
      * BATCH UPDATE
      *
      * @param sqlParameter the {@link SqlParameter} instance
-     * @return Affected Rows
+     * @return AFFECTED ROWS
      */
     public int[] batchUpdate(@NotNull SqlParameter sqlParameter) {
         JdbcTemplate jdbcTemplate = getJdbcTemplate();
@@ -244,17 +247,9 @@ public class Executor {
         return jdbcTemplate;
     }
 
-    /**
-     * SELECT LIST
-     *
-     * @param sqlParameter the {@link SqlParameter} instance
-     * @param columnNames  [ Column Name ]
-     * @param valueTypes   [ Column Name : Value Type ]
-     * @param result       [ [ Column Name : Column Value ] ]
-     */
     protected void writeLogSelectList(SqlParameter sqlParameter, List<String> columnNames, Map<String, Integer> valueTypes, List<Map<String, Value>> result) {
         try {
-            LogWriter.Executor logWriter = getLogWriter();
+            LogExecutor logWriter = getLogWriter();
             if (logWriter != null) {
                 logWriter.selectList(sqlParameter, columnNames, valueTypes, result);
             }
@@ -262,17 +257,9 @@ public class Executor {
         }
     }
 
-    /**
-     * SELECT ONE
-     *
-     * @param sqlParameter the {@link SqlParameter} instance
-     * @param columnNames  [ Column Name ]
-     * @param valueTypes   [ Column Name : Value Type ]
-     * @param result       [ Column Name : Column Value ]
-     */
     protected void writeLogSelectOne(SqlParameter sqlParameter, List<String> columnNames, Map<String, Integer> valueTypes, Map<String, Value> result) {
         try {
-            LogWriter.Executor logWriter = getLogWriter();
+            LogExecutor logWriter = getLogWriter();
             if (logWriter != null) {
                 logWriter.selectOne(sqlParameter, columnNames, valueTypes, result);
             }
@@ -280,16 +267,9 @@ public class Executor {
         }
     }
 
-    /**
-     * GET ONE
-     *
-     * @param sqlParameter the {@link SqlParameter} instance
-     * @param valueType    Value Type
-     * @param result       Column Value
-     */
     protected void writeLogGetOne(SqlParameter sqlParameter, int valueType, Value result) {
         try {
-            LogWriter.Executor logWriter = getLogWriter();
+            LogExecutor logWriter = getLogWriter();
             if (logWriter != null) {
                 logWriter.getOne(sqlParameter, valueType, result);
             }
@@ -297,15 +277,9 @@ public class Executor {
         }
     }
 
-    /**
-     * UPDATE
-     *
-     * @param sqlParameter the {@link SqlParameter} instance
-     * @param result       Affected Rows
-     */
     protected void writeLogUpdate(SqlParameter sqlParameter, int result) {
         try {
-            LogWriter.Executor logWriter = getLogWriter();
+            LogExecutor logWriter = getLogWriter();
             if (logWriter != null) {
                 logWriter.update(sqlParameter, result);
             }
@@ -313,15 +287,9 @@ public class Executor {
         }
     }
 
-    /**
-     * UPDATE LIST
-     *
-     * @param sqlParameter the {@link SqlParameter} instance
-     * @param result       Affected Rows
-     */
     protected void writeLogUpdateList(SqlParameter sqlParameter, int result) {
         try {
-            LogWriter.Executor logWriter = getLogWriter();
+            LogExecutor logWriter = getLogWriter();
             if (logWriter != null) {
                 logWriter.updateList(sqlParameter, result);
             }
@@ -329,15 +297,9 @@ public class Executor {
         }
     }
 
-    /**
-     * BATCH UPDATE
-     *
-     * @param sqlParameter the {@link SqlParameter} instance
-     * @param result       Affected Rows
-     */
     protected void writeLogBatchUpdate(SqlParameter sqlParameter, int[] result) {
         try {
-            LogWriter.Executor logWriter = getLogWriter();
+            LogExecutor logWriter = getLogWriter();
             if (logWriter != null) {
                 logWriter.batchUpdate(sqlParameter, result);
             }
@@ -345,13 +307,8 @@ public class Executor {
         }
     }
 
-    /**
-     * Log Writer
-     *
-     * @return the {@link LogWriter.Executor} instance
-     */
     @Nullable
-    protected LogWriter.Executor getLogWriter() {
+    protected LogExecutor getLogWriter() {
         return LogWriter.getExecutor();
     }
 

@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>summer-boot-xdatabase</artifactId>
+    <artifactId>summer-boot-xtable</artifactId>
     <version>1.0.1</version>
 
     <parent>
@@ -15,19 +15,8 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-jdbc</artifactId>
-        </dependency>
-
-        <dependency>
             <groupId>io.github.summer.boot</groupId>
-            <artifactId>summer-boot-xtable</artifactId>
-            <version>1.0.1</version>
-        </dependency>
-
-        <dependency>
-            <groupId>io.github.summer.boot</groupId>
-            <artifactId>summer-boot-sql</artifactId>
+            <artifactId>summer-boot-value</artifactId>
             <version>1.0.1</version>
         </dependency>
     </dependencies>

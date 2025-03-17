@@ -1,7 +1,7 @@
 package io.github.summer.boot.xdatabase.value;
 
+import io.github.summer.boot.sql.Preconditions;
 import io.github.summer.boot.value.Value;
-import io.github.summer.boot.xdatabase.Preconditions;
 
 import java.util.*;
 
