@@ -368,7 +368,7 @@ public class Database {
      * @return [ the {@link BaseFilter} instance ]
      */
     @NotNull
-    public List<BaseFilter> parseKey(@NotNull String tableName, @NotNull Value keyValue, @Nullable String keyName, Integer tableNum) {
+    public List<BaseFilter> parseKey(@NotNull String tableName, @NotNull Value keyValue, @Nullable String keyName, @Nullable Integer tableNum) {
         TableSchema tableSchema = getTableSchema(tableName, tableNum);
         return parseKey(tableSchema, keyValue, keyName);
     }
