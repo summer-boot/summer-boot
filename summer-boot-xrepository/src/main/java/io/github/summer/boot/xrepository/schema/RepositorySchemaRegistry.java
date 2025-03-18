@@ -1,4 +1,4 @@
-package io.github.summer.boot.xrepository;
+package io.github.summer.boot.xrepository.schema;
 
 import io.github.summer.boot.sql.Preconditions;
 

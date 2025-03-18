@@ -1,4 +1,4 @@
-package io.github.summer.boot.xrepository;
+package io.github.summer.boot.xrepository.schema;
 
 import org.springframework.context.ApplicationEvent;
 
