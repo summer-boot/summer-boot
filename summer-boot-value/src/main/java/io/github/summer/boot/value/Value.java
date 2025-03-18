@@ -167,11 +167,11 @@ public final class Value implements Serializable {
     public int hashCode() {
         int type = getType();
         return switch (type) {
-            case Types.STRING -> Objects.hash(getValueString());
-            case Types.INTEGER -> Objects.hash(getValueInteger());
-            case Types.LONG -> Objects.hash(getValueLong());
-            case Types.BIG_DECIMAL -> Objects.hash(getValueBigDecimal());
-            case Types.DATE -> Objects.hash(getValueDate());
+            case Types.STRING -> Objects.hashCode(getValueString());
+            case Types.INTEGER -> Objects.hashCode(getValueInteger());
+            case Types.LONG -> Objects.hashCode(getValueLong());
+            case Types.BIG_DECIMAL -> Objects.hashCode(getValueBigDecimal());
+            case Types.DATE -> Objects.hashCode(getValueDate());
             default -> throw new UnsupportedValueTypeException(type);
         };
     }
