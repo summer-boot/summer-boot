@@ -19,6 +19,12 @@ public class StringCache {
     private static final Logger LOGGER = LoggerFactory.getLogger(StringCache.class);
 
     /**
+     * 默认的拼接符
+     * 拼接缓存名，如，"缓存名::键名"
+     */
+    private static final String SEPARATOR = "::";
+
+    /**
      * 缓存模板
      */
     private final StringRedisTemplate stringRedisTemplate;
@@ -32,7 +38,9 @@ public class StringCache {
         Preconditions.requireNonNull(stringRedisTemplate, "stringRedisTemplate must not be null");
 
         this.stringRedisTemplate = stringRedisTemplate;
-        this.cacheName = cacheName != null ? cacheName.trim() : "";
+
+        String trimmedName = cacheName != null ? cacheName.trim() : "";
+        this.cacheName = trimmedName.isEmpty() ? "" : trimmedName + SEPARATOR;
     }
 
     /**
