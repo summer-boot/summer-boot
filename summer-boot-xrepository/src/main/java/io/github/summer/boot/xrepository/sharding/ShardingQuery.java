@@ -32,7 +32,7 @@ public class ShardingQuery {
     public Map<String, Integer> selectAll() {
         return jdbcTemplate.query
                 (
-                        "SELECT table_name, table_size FROM repository_sharding",
+                        "SELECT table_name, table_size FROM xrepository_sharding",
                         rs -> {
                             Map<String, Integer> data = new HashMap<>();
 
@@ -60,7 +60,7 @@ public class ShardingQuery {
     public Integer selectOne(@NotNull String tableName) {
         return jdbcTemplate.query
                 (
-                        "SELECT table_size FROM repository_sharding WHERE table_name = ?",
+                        "SELECT table_size FROM xrepository_sharding WHERE table_name = ?",
                         ps -> ps.setString(1, tableName),
                         rs -> {
                             if (rs.next()) {

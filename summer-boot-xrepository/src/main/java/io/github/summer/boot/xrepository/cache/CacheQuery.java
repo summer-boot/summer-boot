@@ -60,7 +60,7 @@ public class CacheQuery {
     public Integer selectOne(@NotNull String tableName) {
         return jdbcTemplate.query
                 (
-                        "SELECT cache_time FROM repository_cache WHERE table_name = ?",
+                        "SELECT cache_time FROM xrepository_cache WHERE table_name = ?",
                         ps -> ps.setString(1, tableName),
                         rs -> {
                             if (rs.next()) {
