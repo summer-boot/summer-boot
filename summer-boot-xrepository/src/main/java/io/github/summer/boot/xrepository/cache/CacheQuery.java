@@ -37,8 +37,13 @@ public class CacheQuery {
                             Map<String, Integer> data = new HashMap<>();
 
                             while (rs.next()) {
-                                String tableName = rs.getString("table_name");
-                                if (tableName == null) {
+                                String rawTableName = rs.getString("table_name");
+                                if (rawTableName == null) {
+                                    continue;
+                                }
+
+                                String tableName = rawTableName.trim();
+                                if (tableName.isEmpty()) {
                                     continue;
                                 }
 
