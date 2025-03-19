@@ -5,7 +5,7 @@ CREATE TABLE xrepository_key
     key_name   varchar(64) NOT NULL DEFAULT '' COMMENT '键名',
     PRIMARY KEY (table_name)
 ) ENGINE = InnoDB
-  DEFAULT CHARSET = utf8mb4 COMMENT ='键名概要';
+  DEFAULT CHARSET = utf8mb4 COMMENT ='键名';
 
 DROP TABLE IF EXISTS xrepository_cache;
 CREATE TABLE xrepository_cache
@@ -14,7 +14,7 @@ CREATE TABLE xrepository_cache
     cache_time int(10) unsigned NOT NULL DEFAULT '0' COMMENT '缓存秒数',
     PRIMARY KEY (table_name)
 ) ENGINE = InnoDB
-  DEFAULT CHARSET = utf8mb4 COMMENT ='缓存概要';
+  DEFAULT CHARSET = utf8mb4 COMMENT ='缓存';
 
 DROP TABLE IF EXISTS xrepository_sharding;
 CREATE TABLE xrepository_sharding
@@ -23,4 +23,4 @@ CREATE TABLE xrepository_sharding
     table_size int(10) unsigned NOT NULL DEFAULT '0' COMMENT '分表表数',
     PRIMARY KEY (table_name)
 ) ENGINE = InnoDB
-  DEFAULT CHARSET = utf8mb4 COMMENT ='分表概要';
+  DEFAULT CHARSET = utf8mb4 COMMENT ='分表';
