@@ -3,8 +3,9 @@ package io.github.summer.boot.xrepository.cache;
 import io.github.summer.boot.sql.Preconditions;
 import jakarta.validation.constraints.NotNull;
 
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -36,6 +37,22 @@ public final class CacheRegistry {
     }
 
     /**
+     * Put All
+     *
+     * @param data [ Table Name : Cache Time ]
+     */
+    public static void putAll(@NotNull Map<String, Integer> data) {
+        data.entrySet().stream()
+                .filter(Objects::nonNull)
+                .filter(entry -> Objects.nonNull(entry.getKey()))
+                .forEach(entry -> {
+                    String tableName = entry.getKey();
+                    Integer cacheTime = entry.getValue();
+                    put(tableName, cacheTime);
+                });
+    }
+
+    /**
      * Put Schema
      *
      * @param tableName Table Name
@@ -44,7 +61,11 @@ public final class CacheRegistry {
      */
     public static Integer put(String tableName, Integer cacheTime) {
         Preconditions.requireNonNull(tableName, "tableName must not be null");
-        return DATA.put(tableName, cacheTime);
+        if (cacheTime != null) {
+            return DATA.put(tableName, cacheTime);
+        } else {
+            return DATA.remove(tableName);
+        }
     }
 
     /**
@@ -78,8 +99,8 @@ public final class CacheRegistry {
      * @return [ Key Name ]
      */
     @NotNull
-    public static Set<String> keySet() {
-        return DATA.keySet();
+    public static List<String> getKeys() {
+        return DATA.keySet().stream().filter(Objects::nonNull).toList();
     }
 
 }

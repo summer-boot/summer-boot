@@ -3,8 +3,9 @@ package io.github.summer.boot.xrepository.key;
 import io.github.summer.boot.sql.Preconditions;
 import jakarta.validation.constraints.NotNull;
 
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -36,6 +37,22 @@ public final class KeyRegistry {
     }
 
     /**
+     * Put All
+     *
+     * @param data [ Table Name : Key Name ]
+     */
+    public static void putAll(@NotNull Map<String, String> data) {
+        data.entrySet().stream()
+                .filter(Objects::nonNull)
+                .filter(entry -> Objects.nonNull(entry.getKey()))
+                .forEach(entry -> {
+                    String tableName = entry.getKey();
+                    String keyName = entry.getValue();
+                    put(tableName, keyName);
+                });
+    }
+
+    /**
      * Put Schema
      *
      * @param tableName Table Name
@@ -44,7 +61,11 @@ public final class KeyRegistry {
      */
     public static String put(String tableName, String keyName) {
         Preconditions.requireNonNull(tableName, "tableName must not be null");
-        return DATA.put(tableName, keyName);
+        if (keyName != null) {
+            return DATA.put(tableName, keyName);
+        } else {
+            return DATA.remove(tableName);
+        }
     }
 
     /**
@@ -78,8 +99,8 @@ public final class KeyRegistry {
      * @return [ Key Name ]
      */
     @NotNull
-    public static Set<String> keySet() {
-        return DATA.keySet();
+    public static List<String> getKeys() {
+        return DATA.keySet().stream().filter(Objects::nonNull).toList();
     }
 
 }
