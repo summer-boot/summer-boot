@@ -1,5 +1,6 @@
 package io.github.summer.boot.xrepository.sharding;
 
+import io.github.summer.boot.value.HashCode;
 import io.github.summer.boot.value.Types;
 import io.github.summer.boot.value.UnsupportedValueTypeException;
 import io.github.summer.boot.value.Value;

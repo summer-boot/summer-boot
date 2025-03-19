@@ -1,4 +1,4 @@
-package io.github.summer.boot.xrepository.sharding;
+package io.github.summer.boot.value;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -43,7 +43,7 @@ public final class HashCode {
      * @return hashed code
      */
     public static long hashCode(Long value) {
-        long hashedCode = value != null ? value : 0;
+        long hashedCode = value != null ? value : 0L;
         return Math.abs(hashedCode);
     }
 
