@@ -1,6 +1,7 @@
 package io.github.summer.boot.xrepository.cache;
 
 import io.github.summer.boot.sql.Preconditions;
+import jakarta.validation.constraints.NotNull;
 
 import java.util.Map;
 import java.util.Set;
@@ -76,6 +77,7 @@ public final class CacheRegistry {
      *
      * @return [ Key Name ]
      */
+    @NotNull
     public static Set<String> keySet() {
         return DATA.keySet();
     }
