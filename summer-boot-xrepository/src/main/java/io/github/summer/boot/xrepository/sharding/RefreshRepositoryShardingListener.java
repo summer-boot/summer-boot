@@ -1,4 +1,4 @@
-package io.github.summer.boot.xrepository.cache;
+package io.github.summer.boot.xrepository.sharding;
 
 import io.github.summer.boot.sql.Preconditions;
 import jakarta.validation.constraints.NotNull;
@@ -9,13 +9,13 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 /**
- * 刷新缓存配置
+ * 刷新分表配置
  *
  * @author changebooks@qq.com
  */
-public class RefreshRepositoryCacheListener implements ApplicationListener<RefreshRepositoryCacheEvent> {
+public class RefreshRepositoryShardingListener implements ApplicationListener<RefreshRepositoryShardingEvent> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(RefreshRepositoryCacheListener.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(RefreshRepositoryShardingListener.class);
 
     /**
      * the {@link ApplicationEventPublisher} instance
@@ -23,20 +23,20 @@ public class RefreshRepositoryCacheListener implements ApplicationListener<Refre
     private final ApplicationEventPublisher publisher;
 
     /**
-     * the {@link CacheRefresher} instance
+     * the {@link ShardingRefresher} instance
      */
-    private final CacheRefresher refresher;
+    private final ShardingRefresher refresher;
 
-    public RefreshRepositoryCacheListener(ApplicationEventPublisher publisher, JdbcTemplate jdbcTemplate) {
+    public RefreshRepositoryShardingListener(ApplicationEventPublisher publisher, JdbcTemplate jdbcTemplate) {
         Preconditions.requireNonNull(publisher, "publisher must not be null");
         Preconditions.requireNonNull(jdbcTemplate, "jdbcTemplate must not be null");
 
         this.publisher = publisher;
-        this.refresher = new CacheRefresher(jdbcTemplate);
+        this.refresher = new ShardingRefresher(jdbcTemplate);
     }
 
     @Override
-    public void onApplicationEvent(RefreshRepositoryCacheEvent event) {
+    public void onApplicationEvent(RefreshRepositoryShardingEvent event) {
         String tableName = event.getTableName();
         if (tableName == null) {
             refreshAll();
@@ -67,7 +67,7 @@ public class RefreshRepositoryCacheListener implements ApplicationListener<Refre
     protected void doPublishRefreshAll() {
         try {
             ApplicationEventPublisher publisher = getPublisher();
-            publisher.publishEvent(new RefreshRepositoryCacheEvent());
+            publisher.publishEvent(new RefreshRepositoryShardingEvent());
         } catch (Throwable ex) {
             LOGGER.error("doPublishRefreshAll failed, throwable: ", ex);
         }
@@ -81,7 +81,7 @@ public class RefreshRepositoryCacheListener implements ApplicationListener<Refre
     protected void doPublishRefresh(String tableName) {
         try {
             ApplicationEventPublisher publisher = getPublisher();
-            publisher.publishEvent(new RefreshRepositoryCacheEvent(tableName));
+            publisher.publishEvent(new RefreshRepositoryShardingEvent(tableName));
         } catch (Throwable ex) {
             LOGGER.error("doPublishRefresh failed, tableName: {}, throwable: ", tableName, ex);
         }
@@ -92,7 +92,7 @@ public class RefreshRepositoryCacheListener implements ApplicationListener<Refre
      */
     public void refreshAll() {
         try {
-            CacheRefresher refresher = getRefresher();
+            ShardingRefresher refresher = getRefresher();
             refresher.refreshAll();
         } catch (Throwable ex) {
             LOGGER.error("refreshAll failed, throwable: ", ex);
@@ -106,7 +106,7 @@ public class RefreshRepositoryCacheListener implements ApplicationListener<Refre
      */
     public void refresh(String tableName) {
         try {
-            CacheRefresher refresher = getRefresher();
+            ShardingRefresher refresher = getRefresher();
             refresher.refresh(tableName);
         } catch (Throwable ex) {
             LOGGER.error("refresh failed, tableName: {}, throwable: ", tableName, ex);
@@ -119,7 +119,7 @@ public class RefreshRepositoryCacheListener implements ApplicationListener<Refre
     }
 
     @NotNull
-    public CacheRefresher getRefresher() {
+    public ShardingRefresher getRefresher() {
         return refresher;
     }
 
