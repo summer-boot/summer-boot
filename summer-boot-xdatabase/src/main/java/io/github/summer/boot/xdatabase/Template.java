@@ -41,6 +41,11 @@ public class Template {
      */
     private final SqlParser sqlParser;
 
+    /**
+     * the {@link LogTemplate} instance
+     */
+    private LogTemplate logWriter;
+
     public Template(Executor executor) {
         Preconditions.requireNonNull(executor, "executor must not be null");
 
@@ -487,14 +492,13 @@ public class Template {
         }
     }
 
-    /**
-     * Log Writer
-     *
-     * @return the {@link LogTemplate} instance
-     */
     @Nullable
-    protected LogTemplate getLogWriter() {
-        return LogWriter.getTemplate();
+    public LogTemplate getLogWriter() {
+        return logWriter;
+    }
+
+    public void setLogWriter(@Nullable LogTemplate logWriter) {
+        this.logWriter = logWriter;
     }
 
 }

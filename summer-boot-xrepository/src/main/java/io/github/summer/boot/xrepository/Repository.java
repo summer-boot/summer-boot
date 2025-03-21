@@ -7,9 +7,11 @@ import io.github.summer.boot.sql.Preconditions;
 import io.github.summer.boot.value.Value;
 import io.github.summer.boot.xdatabase.Database;
 import io.github.summer.boot.xrepository.key.KeyRegistry;
+import io.github.summer.boot.xrepository.logger.LogRepository;
 import io.github.summer.boot.xrepository.sharding.ShardingRegistry;
 import io.github.summer.boot.xrepository.sharding.ShardingValue;
 import jakarta.annotation.Nullable;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
@@ -26,10 +28,22 @@ public class Repository {
      */
     private final Database database;
 
-    public Repository(Database database) {
+    /**
+     * the {@link Cache} instance
+     */
+    private final Cache cache;
+
+    /**
+     * the {@link LogRepository} instance
+     */
+    private LogRepository logWriter;
+
+    public Repository(Database database, Cache cache) {
         Preconditions.requireNonNull(database, "database must not be null");
+        Preconditions.requireNonNull(cache, "cache must not be null");
 
         this.database = database;
+        this.cache = cache;
     }
 
     /**
@@ -48,7 +62,10 @@ public class Repository {
         Database database = getDatabase();
 
         Integer tableNum = getTableNum(tableName, shardingValue);
-        return database.selectList(tableName, filters, orders, page, tableNum);
+        List<Map<String, Value>> result = database.selectList(tableName, filters, orders, page, tableNum);
+
+        writeLogSelectList(tableName, filters, orders, page, shardingValue, result);
+        return result;
     }
 
     /**
@@ -63,7 +80,10 @@ public class Repository {
         Database database = getDatabase();
 
         Integer tableNum = getTableNum(tableName, shardingValue);
-        return database.selectCount(tableName, filters, tableNum);
+        long result = database.selectCount(tableName, filters, tableNum);
+
+        writeLogSelectCount(tableName, filters, shardingValue, result);
+        return result;
     }
 
     /**
@@ -74,11 +94,24 @@ public class Repository {
      * @return [ Column Name : Column Value ]
      */
     public Map<String, Value> selectOne(@NotNull String tableName, @NotNull Value keyValue) {
+        Cache cache = getCache();
+        Map<String, Value> cachedResult = cache.get(tableName, keyValue);
+        if (cachedResult != null) {
+            writeLogSelectOne(tableName, keyValue, cachedResult, true);
+            return cachedResult;
+        }
+
         Database database = getDatabase();
 
         String keyName = getKeyName(tableName);
         Integer tableNum = getTableNum(tableName, keyValue);
-        return database.selectOne(tableName, keyValue, keyName, tableNum);
+        Map<String, Value> result = database.selectOne(tableName, keyValue, keyName, tableNum);
+        if (result != null) {
+            cache.set(tableName, keyValue, result);
+        }
+
+        writeLogSelectOne(tableName, keyValue, result, false);
+        return result;
     }
 
     /**
@@ -96,7 +129,10 @@ public class Repository {
         Database database = getDatabase();
 
         Integer tableNum = getTableNum(tableName, shardingValue);
-        return database.selectOne(tableName, filters, orders, tableNum);
+        Map<String, Value> result = database.selectOne(tableName, filters, orders, tableNum);
+
+        writeLogSelectOne(tableName, filters, orders, shardingValue, result);
+        return result;
     }
 
     /**
@@ -111,7 +147,10 @@ public class Repository {
         Database database = getDatabase();
 
         Integer tableNum = getTableNum(tableName, shardingValue);
-        return database.checkExist(tableName, filters, tableNum);
+        boolean result = database.checkExist(tableName, filters, tableNum);
+
+        writeLogCheckExist(tableName, filters, shardingValue, result);
+        return result;
     }
 
     /**
@@ -124,14 +163,12 @@ public class Repository {
     public int insert(@NotNull String tableName, @NotNull Map<String, Value> values) {
         Database database = getDatabase();
 
-        String keyName = getKeyName(tableName);
-        if (keyName == null) {
-            keyName = database.getIdName(tableName, null);
-        }
-
-        Value shardingValue = values.get(keyName);
+        Value shardingValue = getShardingValue(tableName, values);
         Integer tableNum = getTableNum(tableName, shardingValue);
-        return database.insert(tableName, values, tableNum);
+        int result = database.insert(tableName, values, tableNum);
+
+        writeLogInsert(tableName, values, result);
+        return result;
     }
 
     /**
@@ -146,7 +183,10 @@ public class Repository {
         Database database = getDatabase();
 
         Integer tableNum = getTableNum(tableName, shardingValue);
-        return database.batchInsert(tableName, list, tableNum);
+        int result = database.batchInsert(tableName, list, tableNum);
+
+        writeLogBatchInsert(tableName, list, shardingValue, result);
+        return result;
     }
 
     /**
@@ -165,7 +205,14 @@ public class Repository {
 
         String keyName = getKeyName(tableName);
         Integer tableNum = getTableNum(tableName, keyValue);
-        return database.update(tableName, keyValue, sets, setValues, keyName, tableNum);
+        int affectedRows = database.update(tableName, keyValue, sets, setValues, keyName, tableNum);
+        if (affectedRows > 0) {
+            Cache cache = getCache();
+            cache.delete(tableName, keyValue);
+        }
+
+        writeLogUpdate(tableName, keyValue, sets, setValues, affectedRows);
+        return affectedRows;
     }
 
     /**
@@ -185,7 +232,10 @@ public class Repository {
         Database database = getDatabase();
 
         Integer tableNum = getTableNum(tableName, shardingValue);
-        return database.update(tableName, sets, setValues, filters, tableNum);
+        int result = database.update(tableName, sets, setValues, filters, tableNum);
+
+        writeLogUpdate(tableName, sets, setValues, filters, shardingValue, result);
+        return result;
     }
 
     /**
@@ -206,7 +256,10 @@ public class Repository {
 
         String keyName = getKeyName(tableName);
         Integer tableNum = getTableNum(tableName, shardingValue);
-        return database.batchUpdate(tableName, sets, setNames, list, keyName, tableNum);
+        int[] result = database.batchUpdate(tableName, sets, setNames, list, keyName, tableNum);
+
+        writeLogBatchUpdate(tableName, sets, setNames, list, shardingValue, result);
+        return result;
     }
 
     /**
@@ -221,7 +274,14 @@ public class Repository {
 
         String keyName = getKeyName(tableName);
         Integer tableNum = getTableNum(tableName, keyValue);
-        return database.delete(tableName, keyValue, keyName, tableNum);
+        int affectedRows = database.delete(tableName, keyValue, keyName, tableNum);
+        if (affectedRows > 0) {
+            Cache cache = getCache();
+            cache.delete(tableName, keyValue);
+        }
+
+        writeLogDelete(tableName, keyValue, affectedRows);
+        return affectedRows;
     }
 
     /**
@@ -236,11 +296,43 @@ public class Repository {
         Database database = getDatabase();
 
         Integer tableNum = getTableNum(tableName, shardingValue);
-        return database.delete(tableName, filters, tableNum);
+        int result = database.delete(tableName, filters, tableNum);
+
+        writeLogDelete(tableName, filters, shardingValue, result);
+        return result;
     }
 
     /**
-     * Get Key Name
+     * SHARDING VALUE
+     *
+     * @param tableName Table Name
+     * @param values    [ Column Name : Column Value ]
+     * @return Sharding Value
+     */
+    @Nullable
+    public Value getShardingValue(@NotNull String tableName, @NotNull Map<String, Value> values) {
+        String keyName = getKeyNameOrIdName(tableName);
+        return values.get(keyName);
+    }
+
+    /**
+     * KEY NAME
+     *
+     * @param tableName Table Name
+     * @return Key Name, Primary Key Name
+     */
+    @NotEmpty
+    public String getKeyNameOrIdName(@NotNull String tableName) {
+        String keyName = getKeyName(tableName);
+        if (keyName == null) {
+            return getIdName(tableName);
+        } else {
+            return keyName;
+        }
+    }
+
+    /**
+     * KEY NAME
      *
      * @param tableName Table Name
      * @return Key Name
@@ -251,7 +343,19 @@ public class Repository {
     }
 
     /**
-     * Get Table Num
+     * PRIMARY KEY
+     *
+     * @param tableName Table Name
+     * @return Primary Key Name
+     */
+    @NotEmpty
+    public String getIdName(@NotNull String tableName) {
+        Database database = getDatabase();
+        return database.getIdName(tableName, null);
+    }
+
+    /**
+     * TABLE NUM
      *
      * @param tableName     Table Name
      * @param shardingValue Sharding Value
@@ -274,6 +378,140 @@ public class Repository {
     @NotNull
     public Database getDatabase() {
         return database;
+    }
+
+    @NotNull
+    public Cache getCache() {
+        return cache;
+    }
+
+    protected void writeLogSelectList(String tableName, List<BaseFilter> filters, List<Order> orders, Page page, Value shardingValue, List<Map<String, Value>> result) {
+        try {
+            LogRepository logWriter = getLogWriter();
+            if (logWriter != null) {
+                logWriter.selectList(tableName, filters, orders, page, shardingValue, result);
+            }
+        } catch (Throwable ignored) {
+        }
+    }
+
+    protected void writeLogSelectCount(String tableName, List<BaseFilter> filters, Value shardingValue, long result) {
+        try {
+            LogRepository logWriter = getLogWriter();
+            if (logWriter != null) {
+                logWriter.selectCount(tableName, filters, shardingValue, result);
+            }
+        } catch (Throwable ignored) {
+        }
+    }
+
+    protected void writeLogSelectOne(String tableName, Value keyValue, Map<String, Value> result, boolean useCache) {
+        try {
+            LogRepository logWriter = getLogWriter();
+            if (logWriter != null) {
+                logWriter.selectOne(tableName, keyValue, result, useCache);
+            }
+        } catch (Throwable ignored) {
+        }
+    }
+
+    protected void writeLogSelectOne(String tableName, List<BaseFilter> filters, List<Order> orders, Value shardingValue, Map<String, Value> result) {
+        try {
+            LogRepository logWriter = getLogWriter();
+            if (logWriter != null) {
+                logWriter.selectOne(tableName, filters, orders, shardingValue, result);
+            }
+        } catch (Throwable ignored) {
+        }
+    }
+
+    protected void writeLogCheckExist(String tableName, List<BaseFilter> filters, Value shardingValue, boolean result) {
+        try {
+            LogRepository logWriter = getLogWriter();
+            if (logWriter != null) {
+                logWriter.checkExist(tableName, filters, shardingValue, result);
+            }
+        } catch (Throwable ignored) {
+        }
+    }
+
+    protected void writeLogInsert(String tableName, Map<String, Value> values, int result) {
+        try {
+            LogRepository logWriter = getLogWriter();
+            if (logWriter != null) {
+                logWriter.insert(tableName, values, result);
+            }
+        } catch (Throwable ignored) {
+        }
+    }
+
+    protected void writeLogBatchInsert(String tableName, List<Map<String, Value>> list, Value shardingValue, int result) {
+        try {
+            LogRepository logWriter = getLogWriter();
+            if (logWriter != null) {
+                logWriter.batchInsert(tableName, list, shardingValue, result);
+            }
+        } catch (Throwable ignored) {
+        }
+    }
+
+    protected void writeLogUpdate(String tableName, Value keyValue, List<String> sets, Map<String, Value> setValues, int result) {
+        try {
+            LogRepository logWriter = getLogWriter();
+            if (logWriter != null) {
+                logWriter.update(tableName, keyValue, sets, setValues, result);
+            }
+        } catch (Throwable ignored) {
+        }
+    }
+
+    protected void writeLogUpdate(String tableName, List<String> sets, Map<String, Value> setValues, List<BaseFilter> filters, Value shardingValue, int result) {
+        try {
+            LogRepository logWriter = getLogWriter();
+            if (logWriter != null) {
+                logWriter.update(tableName, sets, setValues, filters, shardingValue, result);
+            }
+        } catch (Throwable ignored) {
+        }
+    }
+
+    protected void writeLogBatchUpdate(String tableName, List<String> sets, List<String> setNames, List<Map<String, Value>> list, Value shardingValue, int[] result) {
+        try {
+            LogRepository logWriter = getLogWriter();
+            if (logWriter != null) {
+                logWriter.batchUpdate(tableName, sets, setNames, list, shardingValue, result);
+            }
+        } catch (Throwable ignored) {
+        }
+    }
+
+    protected void writeLogDelete(String tableName, Value keyValue, int result) {
+        try {
+            LogRepository logWriter = getLogWriter();
+            if (logWriter != null) {
+                logWriter.delete(tableName, keyValue, result);
+            }
+        } catch (Throwable ignored) {
+        }
+    }
+
+    protected void writeLogDelete(String tableName, List<BaseFilter> filters, Value shardingValue, int result) {
+        try {
+            LogRepository logWriter = getLogWriter();
+            if (logWriter != null) {
+                logWriter.delete(tableName, filters, shardingValue, result);
+            }
+        } catch (Throwable ignored) {
+        }
+    }
+
+    @Nullable
+    public LogRepository getLogWriter() {
+        return logWriter;
+    }
+
+    public void setLogWriter(@Nullable LogRepository logWriter) {
+        this.logWriter = logWriter;
     }
 
 }

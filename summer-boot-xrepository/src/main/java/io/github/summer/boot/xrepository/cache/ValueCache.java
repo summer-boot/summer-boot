@@ -26,7 +26,7 @@ public class ValueCache {
     private static final String SEPARATOR = ":";
 
     /**
-     * 缓存模板
+     * the {@link StringCache} instance
      */
     private final StringCache stringCache;
 

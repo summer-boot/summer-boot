@@ -28,6 +28,11 @@ public class Executor {
      */
     private final JdbcTemplate jdbcTemplate;
 
+    /**
+     * the {@link LogExecutor} instance
+     */
+    private LogExecutor logWriter;
+
     public Executor(JdbcTemplate jdbcTemplate) {
         Preconditions.requireNonNull(jdbcTemplate, "jdbcTemplate must not be null");
 
@@ -308,8 +313,12 @@ public class Executor {
     }
 
     @Nullable
-    protected LogExecutor getLogWriter() {
-        return LogWriter.getExecutor();
+    public LogExecutor getLogWriter() {
+        return logWriter;
+    }
+
+    public void setLogWriter(@Nullable LogExecutor logWriter) {
+        this.logWriter = logWriter;
     }
 
 }

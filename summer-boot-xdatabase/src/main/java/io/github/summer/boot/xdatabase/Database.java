@@ -28,6 +28,11 @@ public class Database {
      */
     private final Template template;
 
+    /**
+     * the {@link LogDatabase} instance
+     */
+    private LogDatabase logWriter;
+
     public Database(Template template) {
         Preconditions.requireNonNull(template, "template must not be null");
 
@@ -688,14 +693,13 @@ public class Database {
         }
     }
 
-    /**
-     * Log Writer
-     *
-     * @return the {@link LogDatabase} instance
-     */
     @Nullable
-    protected LogDatabase getLogWriter() {
-        return LogWriter.getDatabase();
+    public LogDatabase getLogWriter() {
+        return logWriter;
+    }
+
+    public void setLogWriter(@Nullable LogDatabase logWriter) {
+        this.logWriter = logWriter;
     }
 
     /**
