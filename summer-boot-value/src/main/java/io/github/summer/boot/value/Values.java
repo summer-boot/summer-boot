@@ -65,6 +65,9 @@ public final class Values implements Serializable {
         setValueDate(valueDate);
     }
 
+    public Values() {
+    }
+
     public int getType() {
         return type;
     }

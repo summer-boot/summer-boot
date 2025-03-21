@@ -66,6 +66,9 @@ public final class Value implements Serializable {
         setValueDate(valueDate);
     }
 
+    public Value() {
+    }
+
     /**
      * 获取值，忽略类型
      *

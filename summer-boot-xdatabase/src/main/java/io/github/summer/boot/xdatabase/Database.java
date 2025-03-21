@@ -244,7 +244,7 @@ public class Database {
         try {
             TableSchema tableSchema = getTableSchema(tableName, tableNum);
             List<String> setNames = parseSetNames(tableSchema, setValues);
-            int result = template.update(tableName, sets, setNames, setValues, filters);
+            int result = template.update(tableSchema.getTableName(), sets, setNames, setValues, filters);
 
             writeLogUpdate(tableName, sets, setValues, filters, tableNum, result);
             return result;
