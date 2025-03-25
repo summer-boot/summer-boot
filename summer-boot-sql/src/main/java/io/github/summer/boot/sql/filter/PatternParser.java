@@ -97,6 +97,35 @@ public final class PatternParser {
     }
 
     /**
+     * 分组
+     *
+     * @param groups [ the {@link Group} instance ]
+     * @return name, name
+     */
+    @NotNull
+    public static String parseGroup(@NotNull List<Group> groups) {
+        return groups.stream()
+                .peek(group -> Preconditions.requireNonNull(group, "group must not be null"))
+                .map(PatternParser::parseGroup)
+                .collect(Collectors.joining(", "))
+                .trim();
+    }
+
+    /**
+     * 分组
+     *
+     * @param group the {@link Group} instance
+     * @return name
+     */
+    @NotNull
+    public static String parseGroup(@NotNull Group group) {
+        String name = group.getName();
+        Preconditions.requireNonNull(name, "name must not be null");
+        Preconditions.requireNonEmpty(name, "name must not be empty");
+        return name;
+    }
+
+    /**
      * 排序
      *
      * @param orders [ the {@link Order} instance ]
