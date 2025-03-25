@@ -1,9 +1,7 @@
 package io.github.summer.boot.sql;
 
 import io.github.summer.boot.filter.*;
-import io.github.summer.boot.sql.filter.OrderParserImpl;
-import io.github.summer.boot.sql.filter.PageParserImpl;
-import io.github.summer.boot.sql.filter.WhereParserImpl;
+import io.github.summer.boot.sql.filter.*;
 import io.github.summer.boot.value.Parameter;
 import jakarta.validation.constraints.NotNull;
 
@@ -13,6 +11,16 @@ import java.util.List;
  * @author changebooks@qq.com
  */
 public class SqlParserImpl implements SqlParser {
+    /**
+     * the {@link GroupParser} instance
+     */
+    private final GroupParser groupParser;
+
+    /**
+     * the {@link HavingParser} instance
+     */
+    private final HavingParser havingParser;
+
     /**
      * the {@link WhereParser} instance
      */
@@ -29,16 +37,26 @@ public class SqlParserImpl implements SqlParser {
     private final PageParser pageParser;
 
     public SqlParserImpl() {
+        this.groupParser = new GroupParserImpl();
+        this.havingParser = new HavingParserImpl();
         this.whereParser = new WhereParserImpl();
         this.orderParser = new OrderParserImpl();
         this.pageParser = new PageParserImpl();
     }
 
-    public SqlParserImpl(WhereParser whereParser, OrderParser orderParser, PageParser pageParser) {
+    public SqlParserImpl(GroupParser groupParser,
+                         HavingParser havingParser,
+                         WhereParser whereParser,
+                         OrderParser orderParser,
+                         PageParser pageParser) {
+        Preconditions.requireNonNull(groupParser, "groupParser must not be null");
+        Preconditions.requireNonNull(havingParser, "havingParser must not be null");
         Preconditions.requireNonNull(whereParser, "whereParser must not be null");
         Preconditions.requireNonNull(orderParser, "orderParser must not be null");
         Preconditions.requireNonNull(pageParser, "pageParser must not be null");
 
+        this.groupParser = groupParser;
+        this.havingParser = havingParser;
         this.whereParser = whereParser;
         this.orderParser = orderParser;
         this.pageParser = pageParser;
@@ -151,6 +169,17 @@ public class SqlParserImpl implements SqlParser {
     }
 
     /**
+     * Parse Having
+     *
+     * @param filters [ the {@link BaseFilter} instance ]
+     * @return the {@link Having} instance
+     */
+    public Having parseHaving(List<BaseFilter> filters) {
+        HavingParser havingParser = getHavingParser();
+        return havingParser.parseHaving(filters);
+    }
+
+    /**
      * Join Where
      *
      * @param sql   SELECT column, column FROM table
@@ -162,6 +191,51 @@ public class SqlParserImpl implements SqlParser {
         WhereParser whereParser = getWhereParser();
         String whereSql = whereParser.prefixedWhere(where);
         return SqlJoiner.joinWhere(sql, whereSql);
+    }
+
+    /**
+     * Join Having
+     *
+     * @param sql    SELECT column, column FROM table GROUP BY name
+     * @param having column = ?
+     * @return SELECT column, column FROM table GROUP BY name HAVING column = ?
+     */
+    @NotNull
+    protected String joinHavingAndPrefixed(@NotNull String sql, String having) {
+        HavingParser havingParser = getHavingParser();
+        String havingSql = havingParser.prefixedHaving(having);
+        return SqlJoiner.joinHaving(sql, havingSql);
+    }
+
+    /**
+     * Join Group
+     *
+     * @param sql    SELECT column, column FROM table
+     * @param groups [ the {@link Group} instance ]
+     * @return SELECT column, column FROM table GROUP BY name
+     */
+    @NotNull
+    protected String joinGroup(@NotNull String sql, List<Group> groups) {
+        GroupParser groupParser = getGroupParser();
+        String groupSql = groupParser.parseGroup(groups);
+        return SqlJoiner.joinGroup(sql, groupSql);
+    }
+
+    /**
+     * Join Having
+     *
+     * @param sql    SELECT column, column FROM table GROUP BY name
+     * @param having the {@link Having} instance
+     * @return SELECT column, column FROM table GROUP BY name HAVING column = ?
+     */
+    @NotNull
+    protected String joinHaving(@NotNull String sql, Having having) {
+        if (having == null) {
+            return sql;
+        } else {
+            String havingSql = having.getSql();
+            return SqlJoiner.joinHaving(sql, havingSql);
+        }
     }
 
     /**
@@ -220,6 +294,16 @@ public class SqlParserImpl implements SqlParser {
         PageParser pageParser = getPageParser();
         String pageSql = pageParser.parseFirstPage();
         return SqlJoiner.joinPage(sql, pageSql);
+    }
+
+    @Override
+    public GroupParser getGroupParser() {
+        return groupParser;
+    }
+
+    @Override
+    public HavingParser getHavingParser() {
+        return havingParser;
     }
 
     @Override

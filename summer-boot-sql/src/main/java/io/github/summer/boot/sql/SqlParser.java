@@ -75,6 +75,22 @@ public interface SqlParser {
     SqlParameter parseDelete(@NotNull String table, List<BaseFilter> filters);
 
     /**
+     * Group Parser
+     *
+     * @return the {@link GroupParser} instance
+     */
+    @NotNull
+    GroupParser getGroupParser();
+
+    /**
+     * Having Parser
+     *
+     * @return the {@link HavingParser} instance
+     */
+    @NotNull
+    HavingParser getHavingParser();
+
+    /**
      * Where Parser
      *
      * @return the {@link WhereParser} instance

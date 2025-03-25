@@ -15,6 +15,38 @@ public final class SqlJoiner {
     }
 
     /**
+     * Join Group
+     *
+     * @param sql   SELECT column, column FROM table
+     * @param group GROUP BY name
+     * @return SELECT column, column FROM table GROUP BY name
+     */
+    @NotNull
+    public static String joinGroup(@NotNull String sql, String group) {
+        if (group == null) {
+            return sql;
+        } else {
+            return joinSql(sql, group);
+        }
+    }
+
+    /**
+     * Join Having
+     *
+     * @param sql    SELECT column, column FROM table GROUP BY name
+     * @param having HAVING column = ?
+     * @return SELECT column, column FROM table GROUP BY name HAVING column = ?
+     */
+    @NotNull
+    public static String joinHaving(@NotNull String sql, String having) {
+        if (having == null) {
+            return sql;
+        } else {
+            return joinSql(sql, having);
+        }
+    }
+
+    /**
      * Join Where
      *
      * @param sql   SELECT column, column FROM table
