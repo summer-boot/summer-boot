@@ -18,6 +18,11 @@ public final class AggregateFunc implements Serializable {
      */
     private String name;
 
+    /**
+     * 字段
+     */
+    private String column;
+
     public int getAggregateCode() {
         return aggregateCode;
     }
@@ -32,6 +37,14 @@ public final class AggregateFunc implements Serializable {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getColumn() {
+        return column;
+    }
+
+    public void setColumn(String column) {
+        this.column = column;
     }
 
 }
