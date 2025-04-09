@@ -11,22 +11,25 @@ import java.util.*;
  *
  * @author changebooks@qq.com
  */
-public class Group implements Serializable {
+public class Group2 implements Serializable {
     /**
      * GROUP BY name, name
      */
     private List<String> columns;
 
     /**
-     * HAVING column = ? AND column = ?
+     * HAVING column = :parameterName AND column IS NOT NULL OR (column >= :parameterName AND column <= :parameterName)
      */
-    private List<BaseFilter> filters;
+    private String sql;
+
+    /**
+     * [ the {@link Parameter} instance ]
+     */
+    private List<Parameter> parameters;
 
     @Override
     public String toString() {
         List<String> columns = getColumns();
-        List<BaseFilter> filters = getHaving();
-        return "{\"or\": %s, \"filters\": %s}".formatted(or, filters);
         String sql = getSql();
         List<Parameter> parameters = getParameters();
         return "{\"columns\": %s, \"sql\": \"%s\", \"parameters\": %s}".formatted(columns, sql, parameters);
@@ -47,12 +50,21 @@ public class Group implements Serializable {
                 .toList();
     }
 
-    public List<BaseFilter> getHaving() {
-        return having;
+    @NotNull
+    public String getSql() {
+        return sql != null ? sql : "";
     }
 
-    public void setHaving(List<BaseFilter> having) {
-        this.having = having;
+    public void setSql(String sql) {
+        this.sql = sql != null ? sql.trim() : null;
+    }
+
+    public List<Parameter> getParameters() {
+        return parameters;
+    }
+
+    public void setParameters(List<Parameter> parameters) {
+        this.parameters = parameters;
     }
 
 }
