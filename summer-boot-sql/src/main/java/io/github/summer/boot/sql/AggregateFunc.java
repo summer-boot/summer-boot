@@ -9,26 +9,21 @@ import java.io.Serializable;
  */
 public final class AggregateFunc implements Serializable {
     /**
-     * 编码
+     * Aggregate Code
      */
-    private int aggregateCode;
+    private int code;
 
     /**
-     * 名称
+     * Column Name
      */
     private String name;
 
-    /**
-     * 字段
-     */
-    private String column;
-
-    public int getAggregateCode() {
-        return aggregateCode;
+    public int getCode() {
+        return code;
     }
 
-    public void setAggregateCode(int aggregateCode) {
-        this.aggregateCode = aggregateCode;
+    public void setCode(int code) {
+        this.code = code;
     }
 
     public String getName() {
@@ -37,14 +32,6 @@ public final class AggregateFunc implements Serializable {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public String getColumn() {
-        return column;
-    }
-
-    public void setColumn(String column) {
-        this.column = column;
     }
 
 }

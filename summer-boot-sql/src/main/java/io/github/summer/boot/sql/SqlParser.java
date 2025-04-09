@@ -49,18 +49,19 @@ public interface SqlParser {
     /**
      * SELECT DISTINCT table1.column, COUNT(*), SUM(table1.column), MAX(table1.column), MIN(table2.column), AVG(table2.column) FROM table1 JOIN table2 ON table1.column = table2.column GROUP BY table1.name HAVING table1.column = ? WHERE table1.column = ? ORDER BY table1.name ASC LIMIT offset, limit
      *
-     * @param tables   [ the {@link JoinTable} instance ]
-     * @param distinct DISTINCT ?
-     * @param columns  table1.column, COUNT(*), SUM(table1.column), MAX(table1.column), MIN(table2.column), AVG(table2.column)
-     * @param groups   [ the {@link Group} instance ]
-     * @param having   [ the {@link BaseFilter} instance ]
-     * @param where    [ the {@link BaseFilter} instance ]
-     * @param orders   [ the {@link Order} instance ]
-     * @param page     the {@link Page} instance
+     * @param table      FROM table
+     * @param joinTables [ the {@link JoinTable} instance ]
+     * @param distinct   DISTINCT ?
+     * @param columns    table1.column, COUNT(*), SUM(table1.column), MAX(table1.column), MIN(table2.column), AVG(table2.column)
+     * @param groups     [ the {@link Group} instance ]
+     * @param having     [ the {@link BaseFilter} instance ]
+     * @param where      [ the {@link BaseFilter} instance ]
+     * @param orders     [ the {@link Order} instance ]
+     * @param page       the {@link Page} instance
      * @return the {@link SqlParameter} instance
      */
     @NotNull
-    SqlParameter parseSelect(@NotNull List<JoinTable> tables,
+    SqlParameter parseSelect(@NotNull String table, @NotNull List<JoinTable> joinTables,
                              boolean distinct, @NotNull List<AggregateFunc> columns,
                              List<Group> groups, List<BaseFilter> having,
                              List<BaseFilter> where, List<Order> orders, Page page);

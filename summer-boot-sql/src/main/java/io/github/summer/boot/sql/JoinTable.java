@@ -10,55 +10,42 @@ import java.util.List;
  */
 public final class JoinTable implements Serializable {
     /**
-     * 编码
+     * Join Code
      */
-    private int joinCode;
+    private int code;
 
     /**
-     * FROM table JOIN
+     * LEFT JOIN table2
      */
-    private String from;
+    private String table;
 
     /**
-     * FROM JOIN table
+     * [ table1.column1 = table2.column1 ]
      */
-    private String to;
+    private List<String> on;
 
-    /**
-     * [ 连表字段 ]
-     */
-    private List<JoinOn> joinOn;
-
-    public int getJoinCode() {
-        return joinCode;
+    public int getCode() {
+        return code;
     }
 
-    public void setJoinCode(int joinCode) {
-        this.joinCode = joinCode;
+    public void setCode(int code) {
+        this.code = code;
     }
 
-    public String getFrom() {
-        return from;
+    public String getTable() {
+        return table;
     }
 
-    public void setFrom(String from) {
-        this.from = from;
+    public void setTable(String table) {
+        this.table = table;
     }
 
-    public String getTo() {
-        return to;
+    public List<String> getOn() {
+        return on;
     }
 
-    public void setTo(String to) {
-        this.to = to;
-    }
-
-    public List<JoinOn> getJoinOn() {
-        return joinOn;
-    }
-
-    public void setJoinOn(List<JoinOn> joinOn) {
-        this.joinOn = joinOn;
+    public void setOn(List<String> on) {
+        this.on = on;
     }
 
 }

@@ -84,6 +84,16 @@ public class SqlParserImpl implements SqlParser {
     }
 
     @Override
+    public SqlParameter parseSelect(String table, boolean distinct, List<AggregateFunc> columns, List<Group> groups, List<BaseFilter> having, List<BaseFilter> where, List<Order> orders, Page page) {
+        return null;
+    }
+
+    @Override
+    public SqlParameter parseSelect(String table, List<JoinTable> joinTables, boolean distinct, List<AggregateFunc> columns, List<Group> groups, List<BaseFilter> having, List<BaseFilter> where, List<Order> orders, Page page) {
+        return null;
+    }
+
+    @Override
     public @NotNull String parseInsert(@NotNull String table,
                                        @NotNull String columns, @NotNull String values, int batchSize) {
         String joinValues = SqlJoiner.joinValuePlaceholders(values, batchSize);
