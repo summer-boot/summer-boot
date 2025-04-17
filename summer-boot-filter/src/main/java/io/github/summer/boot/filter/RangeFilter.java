@@ -1,6 +1,10 @@
 package io.github.summer.boot.filter;
 
 import io.github.summer.boot.value.Parameter;
+import jakarta.validation.constraints.NotNull;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 范围
@@ -44,6 +48,23 @@ public class RangeFilter extends Filter {
         Boolean includeUpper = getIncludeUpper();
         return "{\"or\": %s, \"name\": \"%s\", \"from\": %s, \"to\": %s, \"includeLower\": %s, \"includeUpper\": %s}"
                 .formatted(or, name, from, to, includeLower, includeUpper);
+    }
+
+    @NotNull
+    public List<Parameter> getParameters() {
+        List<Parameter> result = new ArrayList<>();
+
+        Parameter from = getFrom();
+        if (from != null) {
+            result.add(from);
+        }
+
+        Parameter to = getTo();
+        if (to != null) {
+            result.add(to);
+        }
+
+        return result;
     }
 
     public Parameter getFrom() {

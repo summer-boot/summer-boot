@@ -1,16 +1,41 @@
 package io.github.summer.boot.sql;
 
-import io.github.summer.boot.filter.*;
+import io.github.summer.boot.filter.BaseFilter;
+import io.github.summer.boot.filter.Statement;
 import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
 
 /**
- * 命令和参数
+ * 解析命令
  *
  * @author changebooks@qq.com
  */
 public interface SqlParser {
+    /**
+     * SELECT DISTINCT table1.column1, COUNT(1), SUM(table1.column1), MAX(table2.column2), MIN(table2.column2), AVG(table3.column3)
+     * FROM table1 LEFT JOIN table2 ON table1.column1 = table2.column2 LEFT JOIN table3 ON table1.column1 = table3.column3
+     * WHERE table1.column1 = :parameterName AND table2.column2 IS NOT NULL OR (table3.column3 >= :parameterName AND table3.column3 <= :parameterName)
+     * GROUP BY table1.column1, table2.column2 HAVING SUM(table1.column1) >= :parameterName AND MAX(table2.column2) <= :parameterName
+     * ORDER BY SUM(table1.column1), MAX(table2.column2) ASC
+     * LIMIT offset, limit
+     *
+     * @param table    FROM table
+     * @param tables   [ the {@link Table} instance ]
+     * @param distinct DISTINCT ?
+     * @param columns  table1.column1, COUNT(1), SUM(table1.column1), MAX(table2.column2), MIN(table2.column2), AVG(table3.column3)
+     * @param filters  [ the {@link BaseFilter} instance ]
+     * @param group    the {@link Group} instance
+     * @param orders   [ the {@link Order} instance ]
+     * @param page     the {@link Page} instance
+     * @return the {@link SqlParameter} instance
+     */
+    @NotNull
+    SqlParameter parseSelect(@NotNull String table, List<Table> tables,
+                             boolean distinct, @NotNull String columns,
+                             List<BaseFilter> filters, Group group,
+                             List<Order> orders, Page page);
+
     /**
      * SELECT DISTINCT column, column FROM table WHERE column = ? ORDER BY name ASC LIMIT offset, limit
      *
@@ -25,46 +50,8 @@ public interface SqlParser {
     @NotNull
     SqlParameter parseSelect(@NotNull String table,
                              boolean distinct, @NotNull String columns,
-                             List<BaseFilter> filters, List<Order> orders, Page page);
-
-    /**
-     * SELECT DISTINCT column, COUNT(*), SUM(column), MAX(column), MIN(column), AVG(column) FROM table GROUP BY name HAVING column = ? WHERE column = ? ORDER BY name ASC LIMIT offset, limit
-     *
-     * @param table    FROM table
-     * @param distinct DISTINCT ?
-     * @param columns  column, COUNT(*), SUM(column), MAX(column), MIN(column), AVG(column)
-     * @param groups   [ the {@link Group} instance ]
-     * @param having   [ the {@link BaseFilter} instance ]
-     * @param where    [ the {@link BaseFilter} instance ]
-     * @param orders   [ the {@link Order} instance ]
-     * @param page     the {@link Page} instance
-     * @return the {@link SqlParameter} instance
-     */
-    @NotNull
-    SqlParameter parseSelect(@NotNull String table,
-                             boolean distinct, @NotNull List<AggregateFunc> columns,
-                             List<Group> groups, List<BaseFilter> having,
-                             List<BaseFilter> where, List<Order> orders, Page page);
-
-    /**
-     * SELECT DISTINCT table1.column, COUNT(*), SUM(table1.column), MAX(table1.column), MIN(table2.column), AVG(table2.column) FROM table1 JOIN table2 ON table1.column = table2.column GROUP BY table1.name HAVING table1.column = ? WHERE table1.column = ? ORDER BY table1.name ASC LIMIT offset, limit
-     *
-     * @param table      FROM table
-     * @param joinTables [ the {@link JoinTable} instance ]
-     * @param distinct   DISTINCT ?
-     * @param columns    table1.column, COUNT(*), SUM(table1.column), MAX(table1.column), MIN(table2.column), AVG(table2.column)
-     * @param groups     [ the {@link Group} instance ]
-     * @param having     [ the {@link BaseFilter} instance ]
-     * @param where      [ the {@link BaseFilter} instance ]
-     * @param orders     [ the {@link Order} instance ]
-     * @param page       the {@link Page} instance
-     * @return the {@link SqlParameter} instance
-     */
-    @NotNull
-    SqlParameter parseSelect(@NotNull String table, @NotNull List<JoinTable> joinTables,
-                             boolean distinct, @NotNull List<AggregateFunc> columns,
-                             List<Group> groups, List<BaseFilter> having,
-                             List<BaseFilter> where, List<Order> orders, Page page);
+                             List<BaseFilter> filters,
+                             List<Order> orders, Page page);
 
     /**
      * INSERT INTO table (column, column) VALUES (?, ?), (?, ?), (?, ?)
@@ -114,43 +101,82 @@ public interface SqlParser {
     SqlParameter parseDelete(@NotNull String table, List<BaseFilter> filters);
 
     /**
-     * Group Parser
+     * 解析聚合函数
      *
-     * @return the {@link GroupParser} instance
+     * @param aggregate the {@link Aggregate} instance
+     * @return COUNT(1), SUM(column), MAX(column), MIN(column), AVG(column)
      */
-    @NotNull
-    GroupParser getGroupParser();
+    String parseAggregate(Aggregate aggregate);
 
     /**
-     * Having Parser
+     * 解析连表
      *
-     * @return the {@link HavingParser} instance
+     * @param list [ the {@link Table} instance ]
+     * @return LEFT JOIN table2 ON table1.column1 = table2.column2 LEFT JOIN table3 ON table1.column1 = table3.column3
      */
-    @NotNull
-    HavingParser getHavingParser();
+    String parseTable(List<Table> list);
 
     /**
-     * Where Parser
+     * 解析连表
      *
-     * @return the {@link WhereParser} instance
+     * @param table the {@link Table} instance
+     * @return LEFT JOIN table2 ON table1.column1 = table2.column1 AND table1.column2 = table2.column2
      */
-    @NotNull
-    WhereParser getWhereParser();
+    String parseTable(Table table);
 
     /**
-     * Order Parser
+     * 解析条件
      *
-     * @return the {@link OrderParser} instance
+     * @param list [ the {@link BaseFilter} instance ]
+     * @return the {@link Statement} instance
      */
-    @NotNull
-    OrderParser getOrderParser();
+    Statement parseWhere(List<BaseFilter> list);
 
     /**
-     * Page Parser
+     * 解析条件
      *
-     * @return the {@link PageParser} instance
+     * @param filter the {@link BaseFilter} instance
+     * @return the {@link Statement} instance
      */
-    @NotNull
-    PageParser getPageParser();
+    Statement parseWhere(BaseFilter filter);
+
+    /**
+     * 解析分组
+     *
+     * @param group the {@link Group} instance
+     * @return the {@link Statement} instance
+     */
+    Statement parseGroup(Group group);
+
+    /**
+     * 解析排序
+     *
+     * @param list [ the {@link Order} instance ]
+     * @return ORDER BY name, name ASC, name DESC
+     */
+    String parseOrder(List<Order> list);
+
+    /**
+     * 解析排序
+     *
+     * @param order the {@link Order} instance
+     * @return ORDER BY name, ORDER BY name ASC, ORDER BY name DESC
+     */
+    String parseOrder(Order order);
+
+    /**
+     * 解析分页
+     *
+     * @param page the {@link Page} instance
+     * @return LIMIT offset, limit
+     */
+    String parsePage(Page page);
+
+    /**
+     * 分页首页
+     *
+     * @return LIMIT 1
+     */
+    String parsePageFirst();
 
 }

@@ -1,4 +1,4 @@
-package io.github.summer.boot.filter;
+package io.github.summer.boot.sql;
 
 import java.io.Serializable;
 

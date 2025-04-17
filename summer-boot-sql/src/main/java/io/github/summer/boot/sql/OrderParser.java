@@ -1,4 +1,4 @@
-package io.github.summer.boot.filter;
+package io.github.summer.boot.sql;
 
 import java.util.List;
 
@@ -11,10 +11,10 @@ public interface OrderParser {
     /**
      * 解析列表
      *
-     * @param orders [ the {@link Order} instance ]
+     * @param list [ the {@link Order} instance ]
      * @return ORDER BY name, name ASC, name DESC
      */
-    String parseOrder(List<Order> orders);
+    String parse(List<Order> list);
 
     /**
      * 解析
@@ -22,6 +22,6 @@ public interface OrderParser {
      * @param order the {@link Order} instance
      * @return ORDER BY name, ORDER BY name ASC, ORDER BY name DESC
      */
-    String parseOrder(Order order);
+    String parse(Order order);
 
 }

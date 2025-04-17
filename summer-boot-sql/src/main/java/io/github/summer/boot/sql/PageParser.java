@@ -1,4 +1,4 @@
-package io.github.summer.boot.filter;
+package io.github.summer.boot.sql;
 
 /**
  * 分页
@@ -12,13 +12,13 @@ public interface PageParser {
      * @param page the {@link Page} instance
      * @return LIMIT offset, limit
      */
-    String parsePage(Page page);
+    String parse(Page page);
 
     /**
      * 首页
      *
      * @return LIMIT 1
      */
-    String parseFirstPage();
+    String parseFirst();
 
 }

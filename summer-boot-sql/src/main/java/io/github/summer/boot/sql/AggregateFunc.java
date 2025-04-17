@@ -1,37 +1,34 @@
 package io.github.summer.boot.sql;
 
-import java.io.Serializable;
-
 /**
  * 聚合函数
  *
  * @author changebooks@qq.com
  */
-public final class AggregateFunc implements Serializable {
+public enum AggregateFunc {
     /**
-     * Aggregate Code
+     * 总行数
      */
-    private int code;
+    COUNT,
 
     /**
-     * Column Name
+     * 总和
      */
-    private String name;
+    SUM,
 
-    public int getCode() {
-        return code;
-    }
+    /**
+     * 最大值
+     */
+    MAX,
 
-    public void setCode(int code) {
-        this.code = code;
-    }
+    /**
+     * 最小值
+     */
+    MIN,
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
+    /**
+     * 平均值
+     */
+    AVG,
 
 }

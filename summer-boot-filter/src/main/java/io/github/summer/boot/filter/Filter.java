@@ -26,7 +26,7 @@ public class Filter extends BaseFilter {
     }
 
     public void setName(String name) {
-        this.name = name != null ? name.trim() : null;
+        this.name = name != null ? name.trim() : "";
     }
 
 }

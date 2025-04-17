@@ -1,4 +1,4 @@
-package io.github.summer.boot.filter;
+package io.github.summer.boot.sql;
 
 import jakarta.validation.constraints.NotNull;
 
@@ -33,7 +33,7 @@ public class Order implements Serializable {
     }
 
     public void setName(String name) {
-        this.name = name != null ? name.trim() : null;
+        this.name = name != null ? name.trim() : "";
     }
 
     public Boolean getDesc() {

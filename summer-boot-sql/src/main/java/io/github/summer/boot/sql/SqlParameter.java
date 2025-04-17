@@ -70,7 +70,7 @@ public final class SqlParameter implements Serializable {
     }
 
     public void setSql(String sql) {
-        this.sql = sql != null ? sql.trim() : null;
+        this.sql = sql != null ? sql.trim() : "";
     }
 
     public List<String> getParameterNames() {

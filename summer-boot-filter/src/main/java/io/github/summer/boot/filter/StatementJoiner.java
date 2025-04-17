@@ -1,4 +1,4 @@
-package io.github.summer.boot.sql.statement;
+package io.github.summer.boot.filter;
 
 import io.github.summer.boot.value.Parameter;
 import jakarta.validation.constraints.NotNull;
@@ -23,16 +23,16 @@ public final class StatementJoiner {
      * @param list [ the {@link Statement} instance ]
      * @return the {@link Statement} instance
      */
+    @NotNull
     public static Statement join(@NotNull List<Statement> list) {
         String sql = joinSql(list);
         String logicalOperator = getLogicalOperator(list);
         List<Parameter> parameters = joinParameter(list);
 
-        return new Statement.Builder()
+        return new Statement()
                 .setSql(sql)
                 .setLogicalOperator(logicalOperator)
-                .setParameters(parameters)
-                .build();
+                .setParameters(parameters);
     }
 
     /**
@@ -52,12 +52,20 @@ public final class StatementJoiner {
             }
 
             String sql = statement.getSql();
+            if (sql.isEmpty()) {
+                continue;
+            }
+
             if (first == null) {
                 first = sql;
                 continue;
             }
 
-            String other = LogicalOperator.prefixedSql(statement);
+            String other = statement.prefixedSql();
+            if (other.isEmpty()) {
+                continue;
+            }
+
             others.append(" ").append(other);
         }
 
