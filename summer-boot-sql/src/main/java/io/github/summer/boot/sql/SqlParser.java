@@ -1,7 +1,6 @@
 package io.github.summer.boot.sql;
 
 import io.github.summer.boot.filter.BaseFilter;
-import io.github.summer.boot.filter.Statement;
 import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
@@ -24,7 +23,7 @@ public interface SqlParser {
      * @param tables   [ the {@link Table} instance ]
      * @param distinct DISTINCT ?
      * @param columns  table1.column1, COUNT(1), SUM(table1.column1), MAX(table2.column2), MIN(table2.column2), AVG(table3.column3)
-     * @param filters  [ the {@link BaseFilter} instance ]
+     * @param where    [ the {@link BaseFilter} instance ]
      * @param group    the {@link Group} instance
      * @param orders   [ the {@link Order} instance ]
      * @param page     the {@link Page} instance
@@ -33,7 +32,7 @@ public interface SqlParser {
     @NotNull
     SqlParameter parseSelect(@NotNull String table, List<Table> tables,
                              boolean distinct, @NotNull String columns,
-                             List<BaseFilter> filters, Group group,
+                             List<BaseFilter> where, Group group,
                              List<Order> orders, Page page);
 
     /**
@@ -42,7 +41,7 @@ public interface SqlParser {
      * @param table    FROM table
      * @param distinct DISTINCT ?
      * @param columns  column, COUNT(*) AS aggregate, 1
-     * @param filters  [ the {@link BaseFilter} instance ]
+     * @param where    [ the {@link BaseFilter} instance ]
      * @param orders   [ the {@link Order} instance ]
      * @param page     the {@link Page} instance
      * @return the {@link SqlParameter} instance
@@ -50,7 +49,7 @@ public interface SqlParser {
     @NotNull
     SqlParameter parseSelect(@NotNull String table,
                              boolean distinct, @NotNull String columns,
-                             List<BaseFilter> filters,
+                             List<BaseFilter> where,
                              List<Order> orders, Page page);
 
     /**
@@ -69,14 +68,14 @@ public interface SqlParser {
     /**
      * UPDATE table SET column = ?, column = column + 1 WHERE column = ?
      *
-     * @param table   UPDATE table
-     * @param sets    column = ?, column = column + 1
-     * @param filters [ the {@link BaseFilter} instance ]
+     * @param table UPDATE table
+     * @param sets  column = ?, column = column + 1
+     * @param where [ the {@link BaseFilter} instance ]
      * @return the {@link SqlParameter} instance
      */
     @NotNull
     SqlParameter parseUpdate(@NotNull String table,
-                             @NotNull String sets, List<BaseFilter> filters);
+                             @NotNull String sets, List<BaseFilter> where);
 
     /**
      * UPDATE table SET column = ?, column = column + 1 WHERE column = ?
@@ -93,12 +92,12 @@ public interface SqlParser {
     /**
      * DELETE FROM table WHERE column = ?
      *
-     * @param table   DELETE FROM table
-     * @param filters [ the {@link BaseFilter} instance ]
+     * @param table DELETE FROM table
+     * @param where [ the {@link BaseFilter} instance ]
      * @return the {@link SqlParameter} instance
      */
     @NotNull
-    SqlParameter parseDelete(@NotNull String table, List<BaseFilter> filters);
+    SqlParameter parseDelete(@NotNull String table, List<BaseFilter> where);
 
     /**
      * 解析聚合函数
@@ -107,6 +106,17 @@ public interface SqlParser {
      * @return COUNT(1), SUM(column), MAX(column), MIN(column), AVG(column)
      */
     String parseAggregate(Aggregate aggregate);
+
+    /**
+     * 连表
+     *
+     * @param sqlParameter the {@link SqlParameter} instance
+     * @param list         [ the {@link Table} instance ]
+     */
+    default void joinTable(@NotNull SqlParameter sqlParameter, List<Table> list) {
+        String sql = parseTable(list);
+        sqlParameter.joinSql(sql);
+    }
 
     /**
      * 解析连表
@@ -125,28 +135,61 @@ public interface SqlParser {
     String parseTable(Table table);
 
     /**
+     * 连接条件
+     *
+     * @param sqlParameter the {@link SqlParameter} instance
+     * @param list         [ the {@link BaseFilter} instance ]
+     */
+    default void joinWhere(@NotNull SqlParameter sqlParameter, List<BaseFilter> list) {
+        SqlParameter parsedWhere = parseWhere(list);
+        sqlParameter.join(parsedWhere);
+    }
+
+    /**
      * 解析条件
      *
      * @param list [ the {@link BaseFilter} instance ]
-     * @return the {@link Statement} instance
+     * @return the {@link SqlParameter} instance
      */
-    Statement parseWhere(List<BaseFilter> list);
+    SqlParameter parseWhere(List<BaseFilter> list);
 
     /**
      * 解析条件
      *
      * @param filter the {@link BaseFilter} instance
-     * @return the {@link Statement} instance
+     * @return the {@link SqlParameter} instance
      */
-    Statement parseWhere(BaseFilter filter);
+    SqlParameter parseWhere(BaseFilter filter);
+
+    /**
+     * 连接分组
+     *
+     * @param sqlParameter the {@link SqlParameter} instance
+     * @param group        the {@link Group} instance
+     */
+    default void joinGroup(@NotNull SqlParameter sqlParameter, Group group) {
+        SqlParameter parsedGroup = parseGroup(group);
+        sqlParameter.join(parsedGroup);
+    }
 
     /**
      * 解析分组
      *
      * @param group the {@link Group} instance
-     * @return the {@link Statement} instance
+     * @return the {@link SqlParameter} instance
      */
-    Statement parseGroup(Group group);
+    SqlParameter parseGroup(Group group);
+
+    /**
+     * 连接排序
+     *
+     * @param sqlParameter the {@link SqlParameter} instance
+     * @param list         [ the {@link Order} instance ]
+     */
+    default void joinOrder(@NotNull SqlParameter sqlParameter, List<Order> list) {
+        String sql = parseOrder(list);
+        sqlParameter.joinSql(sql);
+    }
 
     /**
      * 解析排序
@@ -165,6 +208,17 @@ public interface SqlParser {
     String parseOrder(Order order);
 
     /**
+     * 连接分页
+     *
+     * @param sqlParameter the {@link SqlParameter} instance
+     * @param page         the {@link Page} instance
+     */
+    default void joinPage(@NotNull SqlParameter sqlParameter, Page page) {
+        String sql = parsePage(page);
+        sqlParameter.joinSql(sql);
+    }
+
+    /**
      * 解析分页
      *
      * @param page the {@link Page} instance
@@ -173,7 +227,17 @@ public interface SqlParser {
     String parsePage(Page page);
 
     /**
-     * 分页首页
+     * 连接分页首页
+     *
+     * @param sqlParameter the {@link SqlParameter} instance
+     */
+    default void joinPageFirst(@NotNull SqlParameter sqlParameter) {
+        String sql = parsePageFirst();
+        sqlParameter.joinSql(sql);
+    }
+
+    /**
+     * 解析分页首页
      *
      * @return LIMIT 1
      */

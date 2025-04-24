@@ -1,7 +1,6 @@
 package io.github.summer.boot.sql;
 
 import io.github.summer.boot.filter.BaseFilter;
-import io.github.summer.boot.filter.Statement;
 
 import java.util.List;
 
@@ -15,16 +14,24 @@ public interface WhereParser {
      * 解析列表
      *
      * @param list [ the {@link BaseFilter} instance ]
-     * @return the {@link Statement} instance
+     * @return the {@link SqlParameter} instance
      */
-    Statement parse(List<BaseFilter> list);
+    SqlParameter parse(List<BaseFilter> list);
 
     /**
      * 解析
      *
      * @param filter the {@link BaseFilter} instance
-     * @return the {@link Statement} instance
+     * @return the {@link SqlParameter} instance
      */
-    Statement parse(BaseFilter filter);
+    SqlParameter parse(BaseFilter filter);
+
+    /**
+     * Prefixed Where
+     *
+     * @param sql column = ?
+     * @return WHERE column = ?
+     */
+    String prefixedWhere(String sql);
 
 }

@@ -1,9 +1,13 @@
 package io.github.summer.boot.sql.parser;
 
 import io.github.summer.boot.filter.*;
+import io.github.summer.boot.sql.Order;
 import io.github.summer.boot.sql.Preconditions;
 import io.github.summer.boot.sql.parser.pattern.*;
 import jakarta.validation.constraints.NotNull;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 格式
@@ -90,6 +94,34 @@ public final class PatternParser {
     public static String parseWildcard(@NotNull WildcardFilter filter) {
         String pattern = WildcardPattern.getPattern(filter);
         String name = filter.getName();
+        return replaceName(pattern, name);
+    }
+
+    /**
+     * 排序
+     *
+     * @param orders [ the {@link Order} instance ]
+     * @return name, name ASC, name DESC
+     */
+    @NotNull
+    public static String parseOrder(@NotNull List<Order> orders) {
+        return orders.stream()
+                .peek(order -> Preconditions.requireNonNull(order, "order must not be null"))
+                .map(PatternParser::parseOrder)
+                .collect(Collectors.joining(", "))
+                .trim();
+    }
+
+    /**
+     * 排序
+     *
+     * @param order the {@link Order} instance
+     * @return name, name ASC, name DESC
+     */
+    @NotNull
+    public static String parseOrder(@NotNull Order order) {
+        String pattern = OrderPattern.getPattern(order);
+        String name = order.getName();
         return replaceName(pattern, name);
     }
 
