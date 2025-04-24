@@ -27,11 +27,11 @@ public interface WhereParser {
     SqlParameter parse(BaseFilter filter);
 
     /**
-     * Prefixed Where
+     * 连接前缀
      *
      * @param sql column = ?
      * @return WHERE column = ?
      */
-    String prefixedWhere(String sql);
+    String prefixed(String sql);
 
 }

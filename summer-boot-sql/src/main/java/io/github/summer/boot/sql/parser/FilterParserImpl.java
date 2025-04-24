@@ -18,7 +18,7 @@ public class FilterParserImpl implements FilterParser {
     private static final String PLACEHOLDER = "?";
 
     @Override
-    public @NotNull String parseFilter(@NotNull ExpressionFilter filter) {
+    public String parseFilter(ExpressionFilter filter) {
         String pattern = PatternParser.parseExpression(filter);
 
         Parameter parameter = filter.getParameter();
@@ -28,7 +28,7 @@ public class FilterParserImpl implements FilterParser {
     }
 
     @Override
-    public @NotNull String parseFilter(@NotNull InFilter filter) {
+    public String parseFilter(InFilter filter) {
         String pattern = PatternParser.parseIn(filter);
 
         List<Parameter> parameters = filter.getParameters();
@@ -38,12 +38,12 @@ public class FilterParserImpl implements FilterParser {
     }
 
     @Override
-    public @NotNull String parseFilter(@NotNull NullFilter filter) {
+    public String parseFilter(NullFilter filter) {
         return PatternParser.parseNull(filter);
     }
 
     @Override
-    public @NotNull String parseFilter(@NotNull RangeFilter filter) {
+    public String parseFilter(RangeFilter filter) {
         String fromSql = PatternParser.parseRangeFrom(filter);
         String toSql = PatternParser.parseRangeTo(filter);
 
@@ -51,7 +51,7 @@ public class FilterParserImpl implements FilterParser {
     }
 
     @Override
-    public @NotNull String parseFilter(@NotNull WildcardFilter filter) {
+    public String parseFilter(WildcardFilter filter) {
         String pattern = PatternParser.parseWildcard(filter);
 
         Parameter parameter = filter.getParameter();

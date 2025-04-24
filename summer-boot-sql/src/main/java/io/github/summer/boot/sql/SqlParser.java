@@ -36,23 +36,6 @@ public interface SqlParser {
                              List<Order> orders, Page page);
 
     /**
-     * SELECT DISTINCT column, column FROM table WHERE column = ? ORDER BY name ASC LIMIT offset, limit
-     *
-     * @param table    FROM table
-     * @param distinct DISTINCT ?
-     * @param columns  column, COUNT(*) AS aggregate, 1
-     * @param where    [ the {@link BaseFilter} instance ]
-     * @param orders   [ the {@link Order} instance ]
-     * @param page     the {@link Page} instance
-     * @return the {@link SqlParameter} instance
-     */
-    @NotNull
-    SqlParameter parseSelect(@NotNull String table,
-                             boolean distinct, @NotNull String columns,
-                             List<BaseFilter> where,
-                             List<Order> orders, Page page);
-
-    /**
      * INSERT INTO table (column, column) VALUES (?, ?), (?, ?), (?, ?)
      *
      * @param table     INSERT INTO table
@@ -144,6 +127,31 @@ public interface SqlParser {
         SqlParameter parsedWhere = parseWhere(list);
         sqlParameter.join(parsedWhere);
     }
+
+    /**
+     * 连接条件
+     *
+     * @param sql   SELECT column, column FROM table
+     * @param where column = ?
+     * @return SELECT column, column FROM table WHERE column = ?
+     */
+    @NotNull
+    default String joinWhere(@NotNull String sql, String where) {
+        String prefixedWhere = prefixedWhere(where);
+        if (prefixedWhere == null || prefixedWhere.isEmpty()) {
+            return sql;
+        } else {
+            return sql + " " + prefixedWhere;
+        }
+    }
+
+    /**
+     * 连接条件前缀
+     *
+     * @param sql column = ?
+     * @return WHERE column = ?
+     */
+    String prefixedWhere(String sql);
 
     /**
      * 解析条件
