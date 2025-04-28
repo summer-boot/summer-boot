@@ -24,12 +24,4 @@ public interface OrderParser {
      */
     String parse(Order order);
 
-    /**
-     * 连接前缀
-     *
-     * @param sql name, name ASC, name DESC
-     * @return ORDER BY name, name ASC, name DESC
-     */
-    String prefixed(String sql);
-
 }

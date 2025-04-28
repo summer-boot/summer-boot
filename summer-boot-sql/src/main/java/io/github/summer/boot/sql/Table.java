@@ -3,7 +3,7 @@ package io.github.summer.boot.sql;
 import jakarta.validation.constraints.NotNull;
 
 import java.io.Serializable;
-import java.util.List;
+import java.util.*;
 
 /**
  * 连表
@@ -44,11 +44,18 @@ public class Table implements Serializable {
     }
 
     public List<String> getOns() {
-        return ons;
+        return ons != null ? ons : new ArrayList<>();
     }
 
     public void setOns(List<String> ons) {
-        this.ons = ons;
+        this.ons = Optional.ofNullable(ons)
+                .orElse(Collections.emptyList())
+                .stream()
+                .filter(Objects::nonNull)
+                .map(String::trim)
+                .filter(x -> !x.isEmpty())
+                .distinct()
+                .toList();
     }
 
 }

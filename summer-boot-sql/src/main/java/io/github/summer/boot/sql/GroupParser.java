@@ -1,5 +1,7 @@
 package io.github.summer.boot.sql;
 
+import io.github.summer.boot.filter.SqlParameter;
+
 /**
  * 分组
  *
@@ -13,21 +15,5 @@ public interface GroupParser {
      * @return the {@link SqlParameter} instance
      */
     SqlParameter parse(Group group);
-
-    /**
-     * 连接前缀
-     *
-     * @param sql column
-     * @return GROUP BY column
-     */
-    String prefixedGroup(String sql);
-
-    /**
-     * 连接前缀
-     *
-     * @param sql column = ?
-     * @return HAVING column = ?
-     */
-    String prefixedHaving(String sql);
 
 }

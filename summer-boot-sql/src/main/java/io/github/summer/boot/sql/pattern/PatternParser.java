@@ -1,9 +1,8 @@
-package io.github.summer.boot.sql.parser;
+package io.github.summer.boot.sql.pattern;
 
 import io.github.summer.boot.filter.*;
 import io.github.summer.boot.sql.Order;
 import io.github.summer.boot.sql.Preconditions;
-import io.github.summer.boot.sql.parser.pattern.*;
 import jakarta.validation.constraints.NotNull;
 
 import java.util.List;

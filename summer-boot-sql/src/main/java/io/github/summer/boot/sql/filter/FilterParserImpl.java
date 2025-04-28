@@ -1,11 +1,13 @@
-package io.github.summer.boot.sql.parser;
+package io.github.summer.boot.sql.filter;
 
 import io.github.summer.boot.filter.*;
 import io.github.summer.boot.sql.Preconditions;
+import io.github.summer.boot.sql.pattern.PatternParser;
 import io.github.summer.boot.value.Parameter;
 import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -17,8 +19,9 @@ public class FilterParserImpl implements FilterParser {
      */
     private static final String PLACEHOLDER = "?";
 
+    @NotNull
     @Override
-    public String parseFilter(ExpressionFilter filter) {
+    public String parseFilter(@NotNull ExpressionFilter filter) {
         String pattern = PatternParser.parseExpression(filter);
 
         Parameter parameter = filter.getParameter();
@@ -27,8 +30,9 @@ public class FilterParserImpl implements FilterParser {
         return String.format(pattern, parameterName);
     }
 
+    @NotNull
     @Override
-    public String parseFilter(InFilter filter) {
+    public String parseFilter(@NotNull InFilter filter) {
         String pattern = PatternParser.parseIn(filter);
 
         List<Parameter> parameters = filter.getParameters();
@@ -37,21 +41,39 @@ public class FilterParserImpl implements FilterParser {
         return String.format(pattern, parameterName);
     }
 
+    @NotNull
     @Override
-    public String parseFilter(NullFilter filter) {
+    public String parseFilter(@NotNull NullFilter filter) {
         return PatternParser.parseNull(filter);
     }
 
+    @NotNull
     @Override
-    public String parseFilter(RangeFilter filter) {
+    public String parseFilter(@NotNull RangeFilter filter) {
         String fromSql = PatternParser.parseRangeFrom(filter);
         String toSql = PatternParser.parseRangeTo(filter);
 
-        return fromSql + " AND " + toSql;
+        Parameter from = filter.getFrom();
+        Parameter to = filter.getTo();
+
+        if (from != null) {
+            if (to != null) {
+                return String.format("%s %s %s", fromSql, LogicalOperator.AND, toSql);
+            } else {
+                return fromSql;
+            }
+        } else {
+            if (to != null) {
+                return toSql;
+            } else {
+                return "";
+            }
+        }
     }
 
+    @NotNull
     @Override
-    public String parseFilter(WildcardFilter filter) {
+    public String parseFilter(@NotNull WildcardFilter filter) {
         String pattern = PatternParser.parseWildcard(filter);
 
         Parameter parameter = filter.getParameter();
@@ -72,7 +94,9 @@ public class FilterParserImpl implements FilterParser {
         Preconditions.requireNonEmpty(parameters, "parameters must not be empty");
 
         return parameters.stream()
+                .filter(Objects::nonNull)
                 .map(this::getParameterName)
+                .filter(x -> !x.isEmpty())
                 .collect(Collectors.joining(", "));
     }
 
@@ -84,7 +108,11 @@ public class FilterParserImpl implements FilterParser {
      */
     @NotNull
     String getParameterName(Parameter parameter) {
-        String parameterName = parameter != null ? parameter.getName() : "";
+        if (parameter == null) {
+            return "";
+        }
+
+        String parameterName = parameter.getName();
         if (parameterName.isEmpty()) {
             return PLACEHOLDER;
         } else {

@@ -15,17 +15,76 @@ public interface FilterParser {
     /**
      * 解析列表
      *
+     * @param list     [ the {@link BaseFilter} instance ]
+     * @param prefixed WHERE, HAVING
+     * @return the {@link SqlParameter} instance
+     */
+    default SqlParameter parse(List<BaseFilter> list, String prefixed) {
+        Statement statement = parseList(list);
+        if (statement == null) {
+            return null;
+        } else {
+            String sql = prefixed(statement.getSql(), prefixed);
+            List<Parameter> parameters = statement.getParameters();
+            return new SqlParameter(sql, parameters);
+        }
+    }
+
+    /**
+     * 解析
+     *
+     * @param filter   the {@link BaseFilter} instance
+     * @param prefixed WHERE, HAVING
+     * @return the {@link SqlParameter} instance
+     */
+    default SqlParameter parse(BaseFilter filter, String prefixed) {
+        Statement statement = parseOne(filter);
+        if (statement == null) {
+            return null;
+        } else {
+            String sql = prefixed(statement.getSql(), prefixed);
+            List<Parameter> parameters = statement.getParameters();
+            return new SqlParameter(sql, parameters);
+        }
+    }
+
+    /**
+     * 连接前缀
+     *
+     * @param sql      column = ?
+     * @param prefixed WHERE, HAVING
+     * @return WHERE column = ?, HAVING column = ?
+     */
+    default String prefixed(String sql, String prefixed) {
+        if (sql == null) {
+            return null;
+        }
+
+        if (sql.isBlank()) {
+            return "";
+        }
+
+        if (prefixed == null || prefixed.isBlank()) {
+            return sql;
+        } else {
+            return prefixed + " " + sql;
+        }
+    }
+
+    /**
+     * 解析列表
+     *
      * @param list [ the {@link BaseFilter} instance ]
      * @return the {@link Statement} instance
      */
-    default Statement parse(List<BaseFilter> list) {
+    default Statement parseList(List<BaseFilter> list) {
         if (list == null) {
             return null;
         }
 
         List<Statement> statements = list.stream()
                 .filter(Objects::nonNull)
-                .map(this::parse)
+                .map(this::parseOne)
                 .filter(Objects::nonNull)
                 .toList();
 
@@ -42,7 +101,7 @@ public interface FilterParser {
      * @param filter the {@link BaseFilter} instance
      * @return the {@link Statement} instance
      */
-    default Statement parse(BaseFilter filter) {
+    default Statement parseOne(BaseFilter filter) {
         if (filter == null) {
             return null;
         }
@@ -69,7 +128,7 @@ public interface FilterParser {
 
         if (filter instanceof Filters filters) {
             List<BaseFilter> list = filters.getFilters();
-            return parse(list);
+            return parseList(list);
         }
 
         throw new UnsupportedFilterException();

@@ -1,4 +1,4 @@
-package io.github.summer.boot.sql;
+package io.github.summer.boot.filter;
 
 import io.github.summer.boot.value.Parameter;
 import jakarta.validation.constraints.NotNull;
@@ -23,6 +23,21 @@ public final class SqlParameter implements Serializable {
      * [ the {@link Parameter} instance ]
      */
     private List<Parameter> parameters;
+
+    public SqlParameter() {
+    }
+
+    public SqlParameter(String sql, List<Parameter> parameters) {
+        setSql(sql);
+        setParameters(parameters);
+    }
+
+    @Override
+    public String toString() {
+        String sql = getSql();
+        List<Parameter> parameters = getParameters();
+        return "{\"sql\": \"%s\", \"parameters\": %s}".formatted(sql, parameters);
+    }
 
     @NotNull
     public String getSql() {

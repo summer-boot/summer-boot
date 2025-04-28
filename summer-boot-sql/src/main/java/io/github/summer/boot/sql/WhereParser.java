@@ -1,6 +1,7 @@
 package io.github.summer.boot.sql;
 
 import io.github.summer.boot.filter.BaseFilter;
+import io.github.summer.boot.filter.SqlParameter;
 
 import java.util.List;
 

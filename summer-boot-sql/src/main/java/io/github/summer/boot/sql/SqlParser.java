@@ -1,6 +1,7 @@
 package io.github.summer.boot.sql;
 
 import io.github.summer.boot.filter.BaseFilter;
+import io.github.summer.boot.filter.SqlParameter;
 import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
@@ -27,13 +28,13 @@ public interface SqlParser {
      * @param group    the {@link Group} instance
      * @param orders   [ the {@link Order} instance ]
      * @param page     the {@link Page} instance
-     * @return the {@link SqlParameter} instance
+     * @return the {@link BoundSql} instance
      */
     @NotNull
-    SqlParameter parseSelect(@NotNull String table, List<Table> tables,
-                             boolean distinct, @NotNull String columns,
-                             List<BaseFilter> where, Group group,
-                             List<Order> orders, Page page);
+    BoundSql parseSelect(@NotNull String table, List<Table> tables,
+                         boolean distinct, @NotNull String columns,
+                         List<BaseFilter> where, Group group,
+                         List<Order> orders, Page page);
 
     /**
      * INSERT INTO table (column, column) VALUES (?, ?), (?, ?), (?, ?)
@@ -54,11 +55,11 @@ public interface SqlParser {
      * @param table UPDATE table
      * @param sets  column = ?, column = column + 1
      * @param where [ the {@link BaseFilter} instance ]
-     * @return the {@link SqlParameter} instance
+     * @return the {@link BoundSql} instance
      */
     @NotNull
-    SqlParameter parseUpdate(@NotNull String table,
-                             @NotNull String sets, List<BaseFilter> where);
+    BoundSql parseUpdate(@NotNull String table,
+                         @NotNull String sets, List<BaseFilter> where);
 
     /**
      * UPDATE table SET column = ?, column = column + 1 WHERE column = ?
@@ -77,10 +78,10 @@ public interface SqlParser {
      *
      * @param table DELETE FROM table
      * @param where [ the {@link BaseFilter} instance ]
-     * @return the {@link SqlParameter} instance
+     * @return the {@link BoundSql} instance
      */
     @NotNull
-    SqlParameter parseDelete(@NotNull String table, List<BaseFilter> where);
+    BoundSql parseDelete(@NotNull String table, List<BaseFilter> where);
 
     /**
      * 解析聚合函数

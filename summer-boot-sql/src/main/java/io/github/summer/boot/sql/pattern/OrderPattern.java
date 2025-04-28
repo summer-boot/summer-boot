@@ -1,4 +1,4 @@
-package io.github.summer.boot.sql.parser.pattern;
+package io.github.summer.boot.sql.pattern;
 
 import io.github.summer.boot.sql.Order;
 import jakarta.validation.constraints.NotNull;
