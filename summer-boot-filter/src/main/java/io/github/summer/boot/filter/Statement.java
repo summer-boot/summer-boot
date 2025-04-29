@@ -4,6 +4,7 @@ import io.github.summer.boot.value.Parameter;
 import jakarta.validation.constraints.NotNull;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -61,11 +62,11 @@ public final class Statement implements Serializable {
     }
 
     public void joinSql(String sql) {
-        if (sql == null || sql.isEmpty()) {
+        if (sql == null || sql.isBlank()) {
             return;
         }
 
-        if (this.sql == null || this.sql.isEmpty()) {
+        if (this.sql == null || this.sql.isBlank()) {
             this.sql = sql;
         } else {
             this.sql = this.sql + " " + sql;
@@ -80,6 +81,10 @@ public final class Statement implements Serializable {
         this.parameters = parameters;
     }
 
+    public void setParameter(Parameter parameter) {
+        this.parameters = parameter != null ? Collections.singletonList(parameter) : null;
+    }
+
     public void joinParameters(List<Parameter> parameters) {
         if (parameters == null) {
             return;
@@ -89,6 +94,18 @@ public final class Statement implements Serializable {
             this.parameters = parameters;
         } else {
             this.parameters.addAll(parameters);
+        }
+    }
+
+    public void joinParameter(Parameter parameter) {
+        if (parameter == null) {
+            return;
+        }
+
+        if (this.parameters == null) {
+            this.parameters = Collections.singletonList(parameter);
+        } else {
+            this.parameters.add(parameter);
         }
     }
 

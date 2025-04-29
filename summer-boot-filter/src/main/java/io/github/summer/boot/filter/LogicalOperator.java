@@ -14,7 +14,7 @@ public final class LogicalOperator {
     /**
      * 逻辑与
      */
-    public static String AND_WHITESPACE = " AND ";
+    public static String AND_WITH_WHITESPACE = " AND ";
 
     /**
      * 逻辑或
@@ -24,7 +24,7 @@ public final class LogicalOperator {
     /**
      * 逻辑或
      */
-    public static String OR_WHITESPACE = " OR ";
+    public static String OR_WITH_WHITESPACE = " OR ";
 
     private LogicalOperator() {
     }

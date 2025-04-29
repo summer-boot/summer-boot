@@ -9,7 +9,6 @@ import java.util.Objects;
 /**
  * 内部，命令和参数
  *
- * @param filterParser the {@link FilterParser} instance
  * @author changebooks@qq.com
  */
 record InternalStatementParser(FilterParser filterParser) {
@@ -24,14 +23,14 @@ record InternalStatementParser(FilterParser filterParser) {
      * @param list [ the {@link BaseFilter} instance ]
      * @return the {@link InternalStatement} instance
      */
-    public InternalStatement parseList(List<BaseFilter> list) {
+    public InternalStatement parse(List<BaseFilter> list) {
         if (list == null) {
             return null;
         }
 
         List<InternalStatement> statements = list.stream()
                 .filter(Objects::nonNull)
-                .map(this::parseOne)
+                .map(this::parse)
                 .filter(Objects::nonNull)
                 .toList();
 
@@ -48,7 +47,7 @@ record InternalStatementParser(FilterParser filterParser) {
      * @param filter the {@link BaseFilter} instance
      * @return the {@link InternalStatement} instance
      */
-    public InternalStatement parseOne(BaseFilter filter) {
+    public InternalStatement parse(BaseFilter filter) {
         if (filter == null) {
             return null;
         }
@@ -75,7 +74,7 @@ record InternalStatementParser(FilterParser filterParser) {
 
         if (filter instanceof Filters filters) {
             List<BaseFilter> list = filters.getFilters();
-            return parseList(list);
+            return parse(list);
         }
 
         throw new UnsupportedFilterException();
@@ -89,8 +88,6 @@ record InternalStatementParser(FilterParser filterParser) {
      */
     @NotNull
     public InternalStatement parseExpression(@NotNull ExpressionFilter filter) {
-        FilterParser filterParser = filterParser();
-
         String sql = filterParser.parseExpression(filter);
         String logicalOperator = getLogicalOperator(filter);
         Parameter parameter = filter.getParameter();
@@ -109,8 +106,6 @@ record InternalStatementParser(FilterParser filterParser) {
      */
     @NotNull
     public InternalStatement parseIn(@NotNull InFilter filter) {
-        FilterParser filterParser = filterParser();
-
         String sql = filterParser.parseIn(filter);
         String logicalOperator = getLogicalOperator(filter);
         List<Parameter> parameters = filter.getParameters();
@@ -129,8 +124,6 @@ record InternalStatementParser(FilterParser filterParser) {
      */
     @NotNull
     public InternalStatement parseNull(@NotNull NullFilter filter) {
-        FilterParser filterParser = filterParser();
-
         String sql = filterParser.parseNull(filter);
         String logicalOperator = getLogicalOperator(filter);
 
@@ -147,8 +140,6 @@ record InternalStatementParser(FilterParser filterParser) {
      */
     @NotNull
     public InternalStatement parseRange(@NotNull RangeFilter filter) {
-        FilterParser filterParser = filterParser();
-
         String sql = filterParser.parseRange(filter);
         String logicalOperator = getLogicalOperator(filter);
         List<Parameter> parameters = filter.getParameters();
@@ -167,8 +158,6 @@ record InternalStatementParser(FilterParser filterParser) {
      */
     @NotNull
     public InternalStatement parseWildcard(@NotNull WildcardFilter filter) {
-        FilterParser filterParser = filterParser();
-
         String sql = filterParser.parseWildcard(filter);
         String logicalOperator = getLogicalOperator(filter);
         Parameter parameter = filter.getParameter();

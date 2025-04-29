@@ -3,7 +3,7 @@ package io.github.summer.boot.filter;
 import jakarta.validation.constraints.NotNull;
 
 /**
- * 条件
+ * 解析条件
  *
  * @author changebooks@qq.com
  */

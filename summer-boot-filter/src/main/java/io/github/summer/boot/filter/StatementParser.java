@@ -28,11 +28,11 @@ public final class StatementParser {
      * @return the {@link Statement} instance
      */
     public Statement parse(List<BaseFilter> list, String prefix) {
-        InternalStatement internalStatement = internalStatementParser.parseList(list);
+        InternalStatement internalStatement = internalStatementParser.parse(list);
         if (internalStatement == null) {
             return null;
         } else {
-            return parseStatement(internalStatement, prefix);
+            return buildStatement(internalStatement, prefix);
         }
     }
 
@@ -44,11 +44,11 @@ public final class StatementParser {
      * @return the {@link Statement} instance
      */
     public Statement parse(BaseFilter filter, String prefix) {
-        InternalStatement internalStatement = internalStatementParser.parseOne(filter);
+        InternalStatement internalStatement = internalStatementParser.parse(filter);
         if (internalStatement == null) {
             return null;
         } else {
-            return parseStatement(internalStatement, prefix);
+            return buildStatement(internalStatement, prefix);
         }
     }
 
@@ -60,7 +60,7 @@ public final class StatementParser {
      * @return the {@link Statement} instance
      */
     @NotNull
-    Statement parseStatement(@NotNull InternalStatement internalStatement, String prefix) {
+    private Statement buildStatement(@NotNull InternalStatement internalStatement, String prefix) {
         String sql = internalStatement.getSql();
         String prefixedSql = prefixed(sql, prefix);
         List<Parameter> parameters = internalStatement.getParameters();
@@ -74,12 +74,9 @@ public final class StatementParser {
      * @param prefix WHERE, HAVING
      * @return WHERE column = ?, HAVING column = ?
      */
+    @NotNull
     public String prefixed(String sql, String prefix) {
-        if (sql == null) {
-            return null;
-        }
-
-        if (sql.isBlank()) {
+        if (sql == null || sql.isBlank()) {
             return "";
         }
 
@@ -91,7 +88,7 @@ public final class StatementParser {
     }
 
     @NotNull
-    public FilterParser getFilterParser() {
+    public FilterParser filterParser() {
         return internalStatementParser.filterParser();
     }
 
