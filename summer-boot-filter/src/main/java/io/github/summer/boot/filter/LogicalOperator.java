@@ -12,9 +12,19 @@ public final class LogicalOperator {
     public static String AND = "AND";
 
     /**
+     * 逻辑与
+     */
+    public static String AND_WHITESPACE = " AND ";
+
+    /**
      * 逻辑或
      */
     public static String OR = "OR";
+
+    /**
+     * 逻辑或
+     */
+    public static String OR_WHITESPACE = " OR ";
 
     private LogicalOperator() {
     }

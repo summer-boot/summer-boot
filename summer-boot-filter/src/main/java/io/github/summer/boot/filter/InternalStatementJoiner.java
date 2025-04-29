@@ -8,28 +8,28 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * 条件
+ * 内部，命令和参数
  *
  * @author changebooks@qq.com
  */
-public final class StatementJoiner {
+final class InternalStatementJoiner {
 
-    private StatementJoiner() {
+    private InternalStatementJoiner() {
     }
 
     /**
      * Join Statement
      *
-     * @param list [ the {@link Statement} instance ]
-     * @return the {@link Statement} instance
+     * @param list [ the {@link InternalStatement} instance ]
+     * @return the {@link InternalStatement} instance
      */
     @NotNull
-    public static Statement join(@NotNull List<Statement> list) {
+    static InternalStatement join(@NotNull List<InternalStatement> list) {
         String sql = joinSql(list);
         String logicalOperator = getLogicalOperator(list);
         List<Parameter> parameters = joinParameter(list);
 
-        return new Statement()
+        return new InternalStatement()
                 .setSql(sql)
                 .setLogicalOperator(logicalOperator)
                 .setParameters(parameters);
@@ -38,15 +38,15 @@ public final class StatementJoiner {
     /**
      * Join Sql
      *
-     * @param list [ the {@link Statement} instance ]
+     * @param list [ the {@link InternalStatement} instance ]
      * @return column = :parameterName AND column IS NOT NULL OR (column >= :parameterName AND column <= :parameterName)
      */
     @NotNull
-    public static String joinSql(@NotNull List<Statement> list) {
+    static String joinSql(@NotNull List<InternalStatement> list) {
         String first = null;
         StringBuilder others = new StringBuilder();
 
-        for (Statement statement : list) {
+        for (InternalStatement statement : list) {
             if (statement == null) {
                 continue;
             }
@@ -79,29 +79,29 @@ public final class StatementJoiner {
     /**
      * Logical Operator
      *
-     * @param list [ the {@link Statement} instance ]
+     * @param list [ the {@link InternalStatement} instance ]
      * @return AND, OR
      */
     @NotNull
-    public static String getLogicalOperator(@NotNull List<Statement> list) {
+    static String getLogicalOperator(@NotNull List<InternalStatement> list) {
         return list.stream()
                 .filter(Objects::nonNull)
                 .findFirst()
-                .map(Statement::getLogicalOperator)
+                .map(InternalStatement::getLogicalOperator)
                 .orElse("");
     }
 
     /**
      * Join Parameter
      *
-     * @param list [ the {@link Statement} instance ]
+     * @param list [ the {@link InternalStatement} instance ]
      * @return [ the {@link Parameter} instance ]
      */
     @NotNull
-    public static List<Parameter> joinParameter(@NotNull List<Statement> list) {
+    static List<Parameter> joinParameter(@NotNull List<InternalStatement> list) {
         List<Parameter> result = new ArrayList<>();
 
-        for (Statement statement : list) {
+        for (InternalStatement statement : list) {
             if (statement == null) {
                 continue;
             }
