@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * 命令和参数
@@ -78,11 +79,21 @@ public final class Statement implements Serializable {
     }
 
     public void setParameters(List<Parameter> parameters) {
-        this.parameters = parameters;
+        if (parameters != null) {
+            this.parameters = parameters.stream()
+                    .filter(Objects::nonNull)
+                    .toList();
+        } else {
+            this.parameters = null;
+        }
     }
 
     public void setParameter(Parameter parameter) {
-        this.parameters = parameter != null ? Collections.singletonList(parameter) : null;
+        if (parameter != null) {
+            this.parameters = Collections.singletonList(parameter);
+        } else {
+            this.parameters = null;
+        }
     }
 
     public void joinParameters(List<Parameter> parameters) {
@@ -90,10 +101,14 @@ public final class Statement implements Serializable {
             return;
         }
 
-        if (this.parameters == null) {
-            this.parameters = parameters;
+        if (this.parameters != null) {
+            for (Parameter parameter : parameters) {
+                if (parameter != null) {
+                    this.parameters.add(parameter);
+                }
+            }
         } else {
-            this.parameters.addAll(parameters);
+            setParameters(parameters);
         }
     }
 
@@ -102,10 +117,10 @@ public final class Statement implements Serializable {
             return;
         }
 
-        if (this.parameters == null) {
-            this.parameters = Collections.singletonList(parameter);
-        } else {
+        if (this.parameters != null) {
             this.parameters.add(parameter);
+        } else {
+            setParameter(parameter);
         }
     }
 

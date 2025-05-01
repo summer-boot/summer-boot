@@ -1,9 +1,9 @@
 package io.github.summer.boot.sql;
 
-import io.github.summer.boot.filter.SqlParameter;
+import io.github.summer.boot.filter.Statement;
 
 /**
- * 分组
+ * 解析分组
  *
  * @author changebooks@qq.com
  */
@@ -12,8 +12,8 @@ public interface GroupParser {
      * 解析
      *
      * @param group the {@link Group} instance
-     * @return the {@link SqlParameter} instance
+     * @return the {@link Statement} instance
      */
-    SqlParameter parse(Group group);
+    Statement parse(Group group);
 
 }

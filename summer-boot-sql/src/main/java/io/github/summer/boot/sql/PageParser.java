@@ -1,7 +1,7 @@
 package io.github.summer.boot.sql;
 
 /**
- * 分页
+ * 解析分页
  *
  * @author changebooks@qq.com
  */

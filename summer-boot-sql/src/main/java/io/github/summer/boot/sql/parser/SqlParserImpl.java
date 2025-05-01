@@ -1,11 +1,10 @@
 package io.github.summer.boot.sql.parser;
 
 import io.github.summer.boot.filter.BaseFilter;
-import io.github.summer.boot.filter.SqlParameter;
+import io.github.summer.boot.filter.Statement;
 import io.github.summer.boot.sql.*;
 import jakarta.validation.constraints.NotNull;
 
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -53,186 +52,87 @@ public class SqlParserImpl implements SqlParser {
 
     @NotNull
     @Override
-    public BoundSql parseSelect(@NotNull String table, List<Table> tables,
-                                boolean distinct, @NotNull String columns,
-                                List<BaseFilter> where,
-                                Group group,
-                                List<Order> orders, Page page) {
-        String sql = String.format
-                (
-                        "SELECT %s%s FROM %s",
-                        distinct ? "DISTINCT " : "",
-                        columns,
-                        table
-                );
-
-        SqlParameter sqlParameter = new SqlParameter();
-        sqlParameter.setSql(sql);
-
-        joinTable(sqlParameter, tables);
-        joinWhere(sqlParameter, where);
-        joinGroup(sqlParameter, group);
-        joinOrder(sqlParameter, orders);
-        joinPage(sqlParameter, page);
-
-        return BoundSqlParser.parse(sqlParameter);
+    public SqlParameter parseSelect(@NotNull String table, List<Table> tables, boolean distinct, @NotNull String columns, List<BaseFilter> where, Group group, List<Order> orders, Page page) {
+        return null;
     }
 
     @NotNull
     @Override
-    public String parseInsert(@NotNull String table,
-                              @NotNull String columns, @NotNull String values,
-                              int batchSize) {
-        String joinValues = joinValuePlaceholders(values, batchSize);
-
-        return String.format
-                (
-                        "INSERT INTO %s (%s) VALUES (%s)",
-                        table,
-                        columns,
-                        joinValues
-                );
+    public String parseInsert(@NotNull String table, @NotNull String columns, @NotNull String values, int batchSize) {
+        return null;
     }
 
     @NotNull
     @Override
-    public BoundSql parseUpdate(@NotNull String table,
-                                @NotNull String sets,
-                                List<BaseFilter> where) {
-        String sql = String.format
-                (
-                        "UPDATE %s SET %s",
-                        table,
-                        sets
-                );
-
-        SqlParameter sqlParameter = new SqlParameter();
-        sqlParameter.setSql(sql);
-
-        joinWhere(sqlParameter, where);
-
-        return BoundSqlParser.parse(sqlParameter);
+    public SqlParameter parseUpdate(@NotNull String table, @NotNull String sets, List<BaseFilter> where) {
+        return null;
     }
 
     @NotNull
     @Override
-    public String parseUpdate(@NotNull String table,
-                              @NotNull String sets,
-                              String where) {
-        String sql = String.format
-                (
-                        "UPDATE %s SET %s",
-                        table,
-                        sets
-                );
-
-        String prefixedWhere = whereParser.prefixed(where);
-        return joinSql(sql, prefixedWhere);
+    public String parseUpdate(@NotNull String table, @NotNull String sets, String where) {
+        return null;
     }
 
     @NotNull
     @Override
-    public BoundSql parseDelete(@NotNull String table,
-                                List<BaseFilter> where) {
-        String sql = String.format
-                (
-                        "DELETE FROM %s",
-                        table
-                );
-
-        SqlParameter sqlParameter = new SqlParameter();
-        sqlParameter.setSql(sql);
-
-        joinWhere(sqlParameter, where);
-
-        return BoundSqlParser.parse(sqlParameter);
+    public SqlParameter parseDelete(@NotNull String table, List<BaseFilter> where) {
+        return null;
     }
 
     @Override
     public String parseAggregate(Aggregate aggregate) {
-        return aggregateParser.parse(aggregate);
+        return null;
     }
 
     @Override
     public String parseTable(List<Table> list) {
-        return tableParser.parse(list);
+        return null;
     }
 
     @Override
     public String parseTable(Table table) {
-        return tableParser.parse(table);
+        return null;
     }
 
     @Override
     public String prefixedWhere(String sql) {
-        return whereParser.prefixed(sql);
+        return null;
     }
 
     @Override
-    public SqlParameter parseWhere(List<BaseFilter> list) {
-        return whereParser.parse(list);
+    public Statement parseWhere(List<BaseFilter> list) {
+        return null;
     }
 
     @Override
-    public SqlParameter parseWhere(BaseFilter filter) {
-        return whereParser.parse(filter);
+    public Statement parseWhere(BaseFilter filter) {
+        return null;
     }
 
     @Override
-    public SqlParameter parseGroup(Group group) {
-        return groupParser.parse(group);
+    public Statement parseGroup(Group group) {
+        return null;
     }
 
     @Override
     public String parseOrder(List<Order> list) {
-        return orderParser.parse(list);
+        return null;
     }
 
     @Override
     public String parseOrder(Order order) {
-        return orderParser.parse(order);
+        return null;
     }
 
     @Override
     public String parsePage(Page page) {
-        return pageParser.parse(page);
+        return null;
     }
 
     @Override
     public String parsePageFirst() {
-        return pageParser.parseFirst();
-    }
-
-    /**
-     * Join Sql
-     *
-     * @param sql     SELECT column, column FROM table
-     * @param segment WHERE, ORDER, PAGE
-     * @return SELECT column, column FROM table WHERE column = ? ORDER BY name ASC LIMIT offset, limit
-     */
-    @NotNull
-    public String joinSql(@NotNull String sql, String segment) {
-        if (segment == null || segment.isEmpty()) {
-            return sql;
-        } else {
-            return sql + " " + segment;
-        }
-    }
-
-    /**
-     * Join Value Placeholders
-     *
-     * @param valuePlaceholders ?, ?
-     * @param batchSize         Batch Size
-     * @return ?, ?), (?, ?
-     */
-    @NotNull
-    public String joinValuePlaceholders(@NotNull String valuePlaceholders, int batchSize) {
-        if (batchSize > 1) {
-            return String.join("), (", Collections.nCopies(batchSize, valuePlaceholders));
-        } else {
-            return valuePlaceholders;
-        }
+        return null;
     }
 
     public AggregateParser getAggregateParser() {

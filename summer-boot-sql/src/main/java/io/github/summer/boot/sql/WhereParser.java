@@ -1,12 +1,12 @@
 package io.github.summer.boot.sql;
 
 import io.github.summer.boot.filter.BaseFilter;
-import io.github.summer.boot.filter.SqlParameter;
+import io.github.summer.boot.filter.Statement;
 
 import java.util.List;
 
 /**
- * 条件
+ * 解析条件
  *
  * @author changebooks@qq.com
  */
@@ -15,17 +15,17 @@ public interface WhereParser {
      * 解析列表
      *
      * @param list [ the {@link BaseFilter} instance ]
-     * @return the {@link SqlParameter} instance
+     * @return the {@link Statement} instance
      */
-    SqlParameter parse(List<BaseFilter> list);
+    Statement parse(List<BaseFilter> list);
 
     /**
      * 解析
      *
      * @param filter the {@link BaseFilter} instance
-     * @return the {@link SqlParameter} instance
+     * @return the {@link Statement} instance
      */
-    SqlParameter parse(BaseFilter filter);
+    Statement parse(BaseFilter filter);
 
     /**
      * 连接前缀

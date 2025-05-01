@@ -13,7 +13,7 @@ import java.util.Map;
  *
  * @author changebooks@qq.com
  */
-public final class BoundSql implements Serializable {
+public final class SqlParameter implements Serializable {
     /**
      * SELECT FROM table WHERE column = :parameterName AND column IS NOT NULL OR (column >= :parameterName AND column <= :parameterName)
      * INSERT INTO table (column, column) VALUES (:parameterName, :parameterName), (:parameterName, :parameterName), (:parameterName, :parameterName)
@@ -70,7 +70,7 @@ public final class BoundSql implements Serializable {
     }
 
     public void setSql(String sql) {
-        this.sql = sql != null ? sql.trim() : null;
+        this.sql = sql != null ? sql.trim() : "";
     }
 
     public List<String> getParameterNames() {

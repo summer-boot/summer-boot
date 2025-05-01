@@ -112,11 +112,9 @@ final class InternalStatementJoiner {
             }
 
             for (Parameter parameter : parameters) {
-                if (parameter == null) {
-                    continue;
+                if (parameter != null) {
+                    result.add(parameter);
                 }
-
-                result.add(parameter);
             }
         }
 

@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * 内部，命令和参数
@@ -76,7 +77,7 @@ final class InternalStatement implements Serializable {
     }
 
     public InternalStatement setParameters(List<Parameter> parameters) {
-        this.parameters = parameters;
+        this.parameters = parameters != null ? parameters.stream().filter(Objects::nonNull).toList() : null;
         return this;
     }
 

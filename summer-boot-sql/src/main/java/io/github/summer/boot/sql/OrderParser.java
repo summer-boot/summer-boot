@@ -3,7 +3,7 @@ package io.github.summer.boot.sql;
 import java.util.List;
 
 /**
- * 排序
+ * 解析排序
  *
  * @author changebooks@qq.com
  */

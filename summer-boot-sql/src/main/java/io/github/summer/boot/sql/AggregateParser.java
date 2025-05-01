@@ -1,7 +1,7 @@
 package io.github.summer.boot.sql;
 
 /**
- * 聚合函数
+ * 解析聚合函数
  *
  * @author changebooks@qq.com
  */

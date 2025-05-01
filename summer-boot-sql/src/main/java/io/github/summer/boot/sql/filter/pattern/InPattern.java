@@ -1,4 +1,4 @@
-package io.github.summer.boot.sql.pattern;
+package io.github.summer.boot.sql.filter.pattern;
 
 import io.github.summer.boot.filter.InFilter;
 import jakarta.validation.constraints.NotNull;

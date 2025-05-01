@@ -1,4 +1,4 @@
-package io.github.summer.boot.sql.pattern;
+package io.github.summer.boot.sql.filter.pattern;
 
 import io.github.summer.boot.filter.WildcardFilter;
 import jakarta.validation.constraints.NotNull;
@@ -17,7 +17,7 @@ public final class WildcardPattern {
      * 格式
      *
      * @param filter the {@link WildcardFilter} instance
-     * @return %s LIKE CONCAT('%%%%', %s, '%%%%'), %s NOT LIKE CONCAT('%%%%', %s, '%%%%')
+     * @return %s LIKE CONCAT('%%', %s, '%%'), %s NOT LIKE CONCAT('%%', %s, '%%')
      */
     @NotNull
     public static String getPattern(@NotNull WildcardFilter filter) {

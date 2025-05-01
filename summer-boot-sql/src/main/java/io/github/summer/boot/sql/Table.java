@@ -43,6 +43,7 @@ public class Table implements Serializable {
         this.name = name != null ? name.trim() : "";
     }
 
+    @NotNull
     public List<String> getOns() {
         return ons != null ? ons : new ArrayList<>();
     }

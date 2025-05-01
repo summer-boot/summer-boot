@@ -1,5 +1,7 @@
 package io.github.summer.boot.sql;
 
+import jakarta.validation.constraints.NotNull;
+
 import java.io.Serializable;
 
 /**
@@ -26,6 +28,7 @@ public class Aggregate implements Serializable {
         this.func = func;
     }
 
+    @NotNull
     public String getName() {
         return name != null ? name : "";
     }

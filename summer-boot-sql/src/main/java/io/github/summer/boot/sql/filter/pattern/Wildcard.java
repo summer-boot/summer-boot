@@ -1,4 +1,4 @@
-package io.github.summer.boot.sql.pattern;
+package io.github.summer.boot.sql.filter.pattern;
 
 import io.github.summer.boot.filter.WildcardCode;
 import jakarta.validation.constraints.NotNull;
@@ -17,9 +17,9 @@ public enum Wildcard {
      * 编码 : 格式 : 描述
      */
     NULL(WildcardCode.NULL, "", "", "未知"),
-    CONTAINS(WildcardCode.CONTAINS, "%s LIKE CONCAT('%%%%', %s, '%%%%')", "%s NOT LIKE CONCAT('%%%%', %s, '%%%%')", "包含"),
-    STARTS(WildcardCode.STARTS, "%s LIKE CONCAT(%s, '%%%%')", "%s NOT LIKE CONCAT(%s, '%%%%')", "开始于"),
-    ENDS(WildcardCode.ENDS, "%s LIKE CONCAT('%%%%', %s)", "%s NOT LIKE CONCAT('%%%%', %s)", "结束于"),
+    CONTAINS(WildcardCode.CONTAINS, "%s LIKE CONCAT('%%', %s, '%%')", "%s NOT LIKE CONCAT('%%', %s, '%%')", "包含"),
+    STARTS(WildcardCode.STARTS, "%s LIKE CONCAT(%s, '%%')", "%s NOT LIKE CONCAT(%s, '%%')", "开始于"),
+    ENDS(WildcardCode.ENDS, "%s LIKE CONCAT('%%', %s)", "%s NOT LIKE CONCAT('%%', %s)", "结束于"),
 
     ;
 

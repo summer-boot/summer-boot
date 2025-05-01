@@ -1,6 +1,6 @@
 package io.github.summer.boot.sql;
 
-import io.github.summer.boot.filter.SqlParameter;
+import io.github.summer.boot.filter.Statement;
 import io.github.summer.boot.value.Parameter;
 import io.github.summer.boot.value.Value;
 import jakarta.validation.constraints.NotNull;
@@ -11,25 +11,25 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 命令和参数
+ * 解析命令和参数
  *
  * @author changebooks@qq.com
  */
-public final class BoundSqlParser {
+public final class SqlParameterParser {
 
-    private BoundSqlParser() {
+    private SqlParameterParser() {
     }
 
     /**
      * 解析
      *
-     * @param sqlParameter the {@link SqlParameter} instance
-     * @return the {@link BoundSql} instance
+     * @param statement the {@link Statement} instance
+     * @return the {@link SqlParameter} instance
      */
     @NotNull
-    public static BoundSql parse(@NotNull SqlParameter sqlParameter) {
-        String sql = sqlParameter.getSql();
-        List<Parameter> parameters = sqlParameter.getParameters();
+    public static SqlParameter parse(@NotNull Statement statement) {
+        String sql = statement.getSql();
+        List<Parameter> parameters = statement.getParameters();
         return parse(sql, parameters);
     }
 
@@ -38,28 +38,28 @@ public final class BoundSqlParser {
      *
      * @param sql        命令
      * @param parameters 参数列表
-     * @return the {@link BoundSql} instance
+     * @return the {@link SqlParameter} instance
      */
     @NotNull
-    public static BoundSql parse(String sql, List<Parameter> parameters) {
-        BoundSql boundSql = new BoundSql();
+    public static SqlParameter parse(String sql, List<Parameter> parameters) {
+        SqlParameter sqlParameter = new SqlParameter();
 
-        boundSql.setOriginalSql(sql);
-        boundSql.setOriginalParameters(parameters);
+        sqlParameter.setOriginalSql(sql);
+        sqlParameter.setOriginalParameters(parameters);
 
-        parseSql(boundSql);
-        parseParameters(boundSql);
+        parseSql(sqlParameter);
+        parseParameters(sqlParameter);
 
-        return boundSql;
+        return sqlParameter;
     }
 
     /**
      * 解析命令
      *
-     * @param boundSql the {@link BoundSql} instance
+     * @param sqlParameter the {@link SqlParameter} instance
      */
-    static void parseSql(@NotNull BoundSql boundSql) {
-        String originalSql = boundSql.getOriginalSql();
+    static void parseSql(@NotNull SqlParameter sqlParameter) {
+        String originalSql = sqlParameter.getOriginalSql();
         if (originalSql == null) {
             return;
         }
@@ -122,17 +122,17 @@ public final class BoundSqlParser {
         }
 
         String sql = sqlBuilder.toString();
-        boundSql.setSql(sql);
-        boundSql.setParameterNames(parameterNames);
+        sqlParameter.setSql(sql);
+        sqlParameter.setParameterNames(parameterNames);
     }
 
     /**
      * 解析参数
      *
-     * @param boundSql the {@link BoundSql} instance
+     * @param sqlParameter the {@link SqlParameter} instance
      */
-    static void parseParameters(@NotNull BoundSql boundSql) {
-        List<Parameter> originalParameters = boundSql.getOriginalParameters();
+    static void parseParameters(@NotNull SqlParameter sqlParameter) {
+        List<Parameter> originalParameters = sqlParameter.getOriginalParameters();
         if (originalParameters == null) {
             return;
         }
@@ -155,7 +155,7 @@ public final class BoundSqlParser {
             parameters.put(name, value);
         }
 
-        boundSql.setParameters(parameters);
+        sqlParameter.setParameters(parameters);
     }
 
     /**
