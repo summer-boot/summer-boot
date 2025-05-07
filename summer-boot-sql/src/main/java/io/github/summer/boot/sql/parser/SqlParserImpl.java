@@ -5,6 +5,7 @@ import io.github.summer.boot.filter.Statement;
 import io.github.summer.boot.sql.*;
 import jakarta.validation.constraints.NotNull;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -52,7 +53,9 @@ public class SqlParserImpl implements SqlParser {
 
     @NotNull
     @Override
-    public SqlParameter parseSelect(@NotNull String table, List<Table> tables, boolean distinct, @NotNull String columns, List<BaseFilter> where, Group group, List<Order> orders, Page page) {
+    public SqlParameter parseSelect(@NotNull String table, List<Table> tables,
+                                    boolean distinct, @NotNull String columns,
+                                    List<BaseFilter> where, Group group, List<Order> orders, Page page) {
         return null;
     }
 
@@ -82,57 +85,100 @@ public class SqlParserImpl implements SqlParser {
 
     @Override
     public String parseAggregate(Aggregate aggregate) {
-        return null;
+        AggregateParser aggregateParser = getAggregateParser();
+        return aggregateParser.parse(aggregate);
     }
 
     @Override
     public String parseTable(List<Table> list) {
-        return null;
+        TableParser tableParser = getTableParser();
+        return tableParser.parse(list);
     }
 
     @Override
     public String parseTable(Table table) {
-        return null;
+        TableParser tableParser = getTableParser();
+        return tableParser.parse(table);
     }
 
     @Override
     public String prefixedWhere(String sql) {
-        return null;
+        WhereParser whereParser = getWhereParser();
+        return whereParser.prefixed(sql);
     }
 
     @Override
     public Statement parseWhere(List<BaseFilter> list) {
-        return null;
+        WhereParser whereParser = getWhereParser();
+        return whereParser.parse(list);
     }
 
     @Override
     public Statement parseWhere(BaseFilter filter) {
-        return null;
+        WhereParser whereParser = getWhereParser();
+        return whereParser.parse(filter);
     }
 
     @Override
     public Statement parseGroup(Group group) {
-        return null;
+        GroupParser groupParser = getGroupParser();
+        return groupParser.parse(group);
     }
 
     @Override
     public String parseOrder(List<Order> list) {
-        return null;
+        OrderParser orderParser = getOrderParser();
+        return orderParser.parse(list);
     }
 
     @Override
     public String parseOrder(Order order) {
-        return null;
+        OrderParser orderParser = getOrderParser();
+        return orderParser.parse(order);
     }
 
     @Override
     public String parsePage(Page page) {
-        return null;
+        PageParser pageParser = getPageParser();
+        return pageParser.parse(page);
     }
 
     @Override
     public String parsePageFirst() {
-        return null;
+        PageParser pageParser = getPageParser();
+        return pageParser.parseFirst();
+    }
+
+    /**
+     * Join Sql
+     *
+     * @param sql     SELECT column, column FROM table
+     * @param segment WHERE, ORDER, PAGE
+     * @return SELECT column, column FROM table WHERE column = ? ORDER BY name ASC LIMIT offset, limit
+     */
+    @NotNull
+    public String joinSql(@NotNull String sql, String segment) {
+        if (segment == null || segment.isEmpty()) {
+            return sql;
+        } else {
+            return sql + " " + segment;
+        }
+    }
+
+    /**
+     * Join Value Placeholders
+     *
+     * @param valuePlaceholders ?, ?
+     * @param batchSize         Batch Size
+     * @return ?, ?), (?, ?
+     */
+    @NotNull
+    public String joinValuePlaceholders(@NotNull String valuePlaceholders, int batchSize) {
+        if (batchSize > 1) {
+            return String.join("), (", Collections.nCopies(batchSize, valuePlaceholders));
+        } else {
+            return valuePlaceholders;
+        }
     }
 
     public AggregateParser getAggregateParser() {
