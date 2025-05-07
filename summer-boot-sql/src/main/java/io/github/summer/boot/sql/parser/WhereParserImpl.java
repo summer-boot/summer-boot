@@ -1,8 +1,8 @@
 package io.github.summer.boot.sql.parser;
 
 import io.github.summer.boot.filter.BaseFilter;
-import io.github.summer.boot.filter.FilterParser;
 import io.github.summer.boot.filter.Statement;
+import io.github.summer.boot.filter.StatementParser;
 import io.github.summer.boot.sql.WhereParser;
 import io.github.summer.boot.sql.filter.FilterParserImpl;
 
@@ -13,31 +13,37 @@ import java.util.List;
  */
 public class WhereParserImpl implements WhereParser {
     /**
-     * the {@link FilterParser} instance
+     * the {@link StatementParser} instance
      */
-    private final FilterParser filterParser;
+    private final StatementParser statementParser;
 
     public WhereParserImpl() {
-        this.filterParser = new FilterParserImpl();
+        this.statementParser = new StatementParser(new FilterParserImpl());
     }
 
     @Override
     public Statement parse(List<BaseFilter> list) {
-        return null;
+        StatementParser statementParser = getStatementParser();
+        return statementParser.parse(list, "WHERE");
     }
 
     @Override
     public Statement parse(BaseFilter filter) {
-        return null;
+        StatementParser statementParser = getStatementParser();
+        return statementParser.parse(filter, "WHERE");
     }
 
     @Override
     public String prefixed(String sql) {
-        return null;
+        if (sql == null || sql.isBlank()) {
+            return "";
+        } else {
+            return "WHERE " + sql;
+        }
     }
 
-    public FilterParser getFilterParser() {
-        return filterParser;
+    public StatementParser getStatementParser() {
+        return statementParser;
     }
 
 }

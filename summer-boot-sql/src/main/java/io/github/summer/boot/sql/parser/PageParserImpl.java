@@ -10,12 +10,26 @@ public class PageParserImpl implements PageParser {
 
     @Override
     public String parse(Page page) {
-        return null;
+        if (page == null) {
+            return null;
+        }
+
+        Integer limit = page.getLimit();
+        if (limit == null) {
+            return null;
+        }
+
+        Long offset = page.getOffset();
+        if (offset == null) {
+            return "LIMIT " + limit;
+        } else {
+            return "LIMIT " + offset + ", " + limit;
+        }
     }
 
     @Override
     public String parseFirst() {
-        return null;
+        return "LIMIT 1";
     }
 
 }
