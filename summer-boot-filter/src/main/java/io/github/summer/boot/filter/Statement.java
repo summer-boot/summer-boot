@@ -29,6 +29,10 @@ public final class Statement implements Serializable {
     public Statement() {
     }
 
+    public Statement(String sql) {
+        setSql(sql);
+    }
+
     public Statement(String sql, List<Parameter> parameters) {
         setSql(sql);
         setParameters(parameters);

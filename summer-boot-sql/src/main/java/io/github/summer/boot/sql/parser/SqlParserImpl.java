@@ -56,31 +56,82 @@ public class SqlParserImpl implements SqlParser {
     public SqlParameter parseSelect(@NotNull String table, List<Table> tables,
                                     boolean distinct, @NotNull String columns,
                                     List<BaseFilter> where, Group group, List<Order> orders, Page page) {
-        return null;
+        String sql = String.format
+                (
+                        "SELECT %s%s FROM %s",
+                        distinct ? "DISTINCT " : "",
+                        columns,
+                        table
+                );
+
+        Statement statement = new Statement(sql);
+
+        joinTable(statement, tables);
+        joinWhere(statement, where);
+        joinGroup(statement, group);
+        joinOrder(statement, orders);
+        joinPage(statement, page);
+
+        return SqlParameterParser.parse(statement);
     }
 
     @NotNull
     @Override
     public String parseInsert(@NotNull String table, @NotNull String columns, @NotNull String values, int batchSize) {
-        return null;
+        String joinedValue = joinValuePlaceholders(values, batchSize);
+
+        return String.format
+                (
+                        "INSERT INTO %s (%s) VALUES (%s)",
+                        table,
+                        columns,
+                        joinedValue
+                );
     }
 
     @NotNull
     @Override
     public SqlParameter parseUpdate(@NotNull String table, @NotNull String sets, List<BaseFilter> where) {
-        return null;
+        String sql = String.format
+                (
+                        "UPDATE %s SET %s",
+                        table,
+                        sets
+                );
+
+        Statement statement = new Statement(sql);
+        joinWhere(statement, where);
+
+        return SqlParameterParser.parse(statement);
     }
 
     @NotNull
     @Override
     public String parseUpdate(@NotNull String table, @NotNull String sets, String where) {
-        return null;
+        String sql = String.format
+                (
+                        "UPDATE %s SET %s",
+                        table,
+                        sets
+                );
+
+        String prefixedWhere = prefixedWhere(where);
+        return joinSql(sql, prefixedWhere);
     }
 
     @NotNull
     @Override
     public SqlParameter parseDelete(@NotNull String table, List<BaseFilter> where) {
-        return null;
+        String sql = String.format
+                (
+                        "DELETE FROM %s",
+                        table
+                );
+
+        Statement statement = new Statement(sql);
+        joinWhere(statement, where);
+
+        return SqlParameterParser.parse(statement);
     }
 
     @Override
