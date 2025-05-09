@@ -1,8 +1,8 @@
 package io.github.summer.boot.xdatabase;
 
 import io.github.summer.boot.filter.BaseFilter;
-import io.github.summer.boot.filter.Order;
-import io.github.summer.boot.filter.Page;
+import io.github.summer.boot.sql.Order;
+import io.github.summer.boot.sql.Page;
 import io.github.summer.boot.sql.Preconditions;
 import io.github.summer.boot.value.Value;
 import io.github.summer.boot.xdatabase.logger.LogDatabase;
