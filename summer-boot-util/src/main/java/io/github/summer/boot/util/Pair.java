@@ -14,8 +14,8 @@ public final class Pair<F, S> implements Serializable {
     public final S second;
 
     public Pair(F first, S second) {
-        this.second = second;
         this.first = first;
+        this.second = second;
     }
 
     // Because 'of()' is shorter than 'new Pair<>()'.
